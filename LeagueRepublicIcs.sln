@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueRepublicIcs", "League
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueRepublicApi", "LeagueRepublicApi\LeagueRepublicApi.csproj", "{C12FAE2F-AD29-4F80-B9CD-FEA9BF47FD62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueRepublicApi.Tests", "LeagueRepublicApi.Tests\LeagueRepublicApi.Tests.csproj", "{0B2B6E2A-7C2E-41AF-82E6-2E2B0C5C9D19}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{C12FAE2F-AD29-4F80-B9CD-FEA9BF47FD62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C12FAE2F-AD29-4F80-B9CD-FEA9BF47FD62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C12FAE2F-AD29-4F80-B9CD-FEA9BF47FD62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B2B6E2A-7C2E-41AF-82E6-2E2B0C5C9D19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B2B6E2A-7C2E-41AF-82E6-2E2B0C5C9D19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B2B6E2A-7C2E-41AF-82E6-2E2B0C5C9D19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B2B6E2A-7C2E-41AF-82E6-2E2B0C5C9D19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
