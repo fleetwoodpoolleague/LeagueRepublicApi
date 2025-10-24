@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LeagueRepublicApi.Models.FixtureGroups;
 using LeagueRepublicApi.Models.Seasons;
+using LeagueRepublicApi.Models.Fixtures;
 
 namespace LeagueRepublicApi;
 
@@ -24,4 +25,18 @@ public interface ILeagueRepublicApiClient
     /// <param name="seasonId">The season identifier.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task<IReadOnlyList<FixtureGroup>> GetFixtureGroupsForSeasonAsync(long seasonId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 4 Get Fixtures For Season — returns fixtures/matches for a season.
+    /// </summary>
+    /// <param name="seasonId">The season identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task<IReadOnlyList<Fixture>> GetFixturesForSeasonAsync(long seasonId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 5 Get Fixtures For Fixture Group — returns fixtures for a fixture group.
+    /// </summary>
+    /// <param name="fixtureGroupIdentifier">The fixture group identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task<IReadOnlyList<Fixture>> GetFixturesForFixtureGroupAsync(long fixtureGroupIdentifier, CancellationToken cancellationToken = default);
 }

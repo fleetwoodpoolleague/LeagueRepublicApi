@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LeagueRepublicApi.Models.FixtureGroups;
 using LeagueRepublicApi.Models.Seasons;
+using LeagueRepublicApi.Models.Fixtures;
 
 namespace LeagueRepublicApi;
 
@@ -43,6 +44,20 @@ public sealed class LeagueRepublicApiClient : ILeagueRepublicApiClient
         var url = $"json/getFixtureGroupsForSeason/{seasonId}.json";
         var result = await _httpClient.GetFromJsonAsync<List<FixtureGroup>>(url, JsonSerializerOptionsFactory.Options, cancellationToken).ConfigureAwait(false);
         return result ?? new List<FixtureGroup>();
+    }
+
+    public async Task<IReadOnlyList<Fixture>> GetFixturesForSeasonAsync(long seasonId, CancellationToken cancellationToken = default)
+    {
+        var url = $"json/getFixturesForSeason/{seasonId}.json";
+        var result = await _httpClient.GetFromJsonAsync<List<Fixture>>(url, JsonSerializerOptionsFactory.Options, cancellationToken).ConfigureAwait(false);
+        return result ?? new List<Fixture>();
+    }
+
+    public async Task<IReadOnlyList<Fixture>> GetFixturesForFixtureGroupAsync(long fixtureGroupIdentifier, CancellationToken cancellationToken = default)
+    {
+        var url = $"json/getFixturesForFixtureGroup/{fixtureGroupIdentifier}.json";
+        var result = await _httpClient.GetFromJsonAsync<List<Fixture>>(url, JsonSerializerOptionsFactory.Options, cancellationToken).ConfigureAwait(false);
+        return result ?? new List<Fixture>();
     }
 }
 

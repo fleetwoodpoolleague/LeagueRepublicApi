@@ -72,4 +72,62 @@ public class LeagueRepublicApiClientTests
         g.FixtureTypeDesc.Should().Be("Division");
         g.FixtureTypeId.Should().Be(1);
     }
+
+    [Fact]
+    public async Task GetFixturesForSeason_DeserializesResponse()
+    {
+        // Arrange
+        const long seasonId = 153020000;
+        var handler = new FakeHttpMessageHandler(req =>
+        {
+            req.RequestUri!.ToString().Should().Contain($"json/getFixturesForSeason/{seasonId}.json");
+            var json = "[ { \"fixtureID\": 32609296, \"fixtureGroupIdentifier\": 520732801, \"homeTeamName\": \"Bear Inn\", \"roadTeamName\": \"Waggon and Horses\", \"homeScore\": \"2\", \"roadScore\": \"1\", \"result\": true } ]";
+            return FakeHttpMessageHandler.Json(json);
+        });
+        var http = new HttpClient(handler) { BaseAddress = new Uri("https://api.leaguerepublic.com/") };
+        var client = new LeagueRepublicApiClient(http);
+
+        // Act
+        var fixtures = await client.GetFixturesForSeasonAsync(seasonId);
+
+        // Assert
+        fixtures.Should().ContainSingle();
+        var f = fixtures.Single();
+        f.FixtureId.Should().Be(32609296);
+        f.FixtureGroupIdentifier.Should().Be(520732801);
+        f.HomeTeamName.Should().Be("Bear Inn");
+        f.RoadTeamName.Should().Be("Waggon and Horses");
+        f.HomeScore.Should().Be("2");
+        f.RoadScore.Should().Be("1");
+        f.Result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetFixturesForFixtureGroup_DeserializesResponse()
+    {
+        // Arrange
+        const long fixtureGroupIdentifier = 520732801;
+        var handler = new FakeHttpMessageHandler(req =>
+        {
+            req.RequestUri!.ToString().Should().Contain($"json/getFixturesForFixtureGroup/{fixtureGroupIdentifier}.json");
+            var json = "[ { \"fixtureID\": 32609297, \"fixtureGroupIdentifier\": 520732801, \"homeTeamName\": \"Tap & Barrel\", \"roadTeamName\": \"The Clinton Arms\", \"homeScore\": \"2\", \"roadScore\": \"1\", \"result\": true } ]";
+            return FakeHttpMessageHandler.Json(json);
+        });
+        var http = new HttpClient(handler) { BaseAddress = new Uri("https://api.leaguerepublic.com/") };
+        var client = new LeagueRepublicApiClient(http);
+
+        // Act
+        var fixtures = await client.GetFixturesForFixtureGroupAsync(fixtureGroupIdentifier);
+
+        // Assert
+        fixtures.Should().ContainSingle();
+        var f = fixtures.Single();
+        f.FixtureId.Should().Be(32609297);
+        f.FixtureGroupIdentifier.Should().Be(520732801);
+        f.HomeTeamName.Should().Be("Tap & Barrel");
+        f.RoadTeamName.Should().Be("The Clinton Arms");
+        f.HomeScore.Should().Be("2");
+        f.RoadScore.Should().Be("1");
+        f.Result.Should().BeTrue();
+    }
 }
