@@ -12,16 +12,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace LeagueRepublicConsole;
 
-public interface IFileWriter
-{
-    void WriteAllText(string path, string contents);
-}
-
-internal sealed class PhysicalFileWriter : IFileWriter
-{
-    public void WriteAllText(string path, string contents) => File.WriteAllText(path, contents, new UTF8Encoding(false));
-}
-
 public sealed class FixturesIcsGenerator
 {
     private readonly IConfiguration _config;
@@ -35,16 +25,17 @@ public sealed class FixturesIcsGenerator
         _files = files ?? throw new ArgumentNullException(nameof(files));
     }
 
-    public async Task RunAsync()
+    public async Task RunAsync(string? leagueId)
     {
-        var leagueIdStr = _config["leagueid"];
+        var leagueIdStr = string.IsNullOrEmpty(leagueId) ?  _config["leagueid"] : leagueId;
+        
         if (string.IsNullOrWhiteSpace(leagueIdStr))
             throw new InvalidOperationException("Missing 'leagueid' configuration value.");
 
-        if (!long.TryParse(leagueIdStr, out var leagueId))
+        if (!long.TryParse(leagueIdStr, out var id ))
             throw new InvalidOperationException("Invalid 'leagueid' configuration value.");
 
-        var seasons = await _api.GetSeasonsForLeagueAsync(leagueId);
+        var seasons = await _api.GetSeasonsForLeagueAsync(id);
         var current = seasons.FirstOrDefault(s => s.CurrentSeason) ?? seasons.FirstOrDefault();
         if (current is null)
             throw new InvalidOperationException("No seasons returned for league.");

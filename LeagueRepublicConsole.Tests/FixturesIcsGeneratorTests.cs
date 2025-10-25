@@ -76,7 +76,7 @@ public class FixturesIcsGeneratorTests
         fakeApi.Groups.Add(new FixtureGroup { FixtureGroupIdentifier = 10, FixtureGroupDesc = "Division A", FixtureTypeId = 1, FixtureTypeDesc = "Division" });
         fakeApi.Fixtures.Add(new Fixture { FixtureId = 100, FixtureGroupIdentifier = 10, HomeTeamName = "Team A", RoadTeamName = "Team B", FixtureDateInMilliseconds = 1730000000000, VenueAndSubVenueDesc = "Main Hall" });
 
-        await gen.RunAsync();
+        await gen.RunAsync("123");
 
         fakeApi.LeagueIdCalls.Should().ContainSingle().Which.Should().Be(123);
         fakeApi.GroupCalls.Should().ContainSingle().Which.Should().Be(1);
@@ -109,7 +109,7 @@ public class FixturesIcsGeneratorTests
             new Fixture { FixtureId = 101, FixtureGroupIdentifier = 11, HomeTeamName = "B1", RoadTeamName = "B2", FixtureDateInMilliseconds = 1730003600000 }
         });
 
-        await gen.RunAsync();
+        await gen.RunAsync("123");
 
         files.Files.Keys.Count(k => k.EndsWith(".ics")).Should().Be(2);
         files.Files.Keys.Should().Contain(k => k.EndsWith("Division A.ics"));
@@ -128,7 +128,7 @@ public class FixturesIcsGeneratorTests
         fakeApi.Groups.Add(new FixtureGroup { FixtureGroupIdentifier = 10, FixtureGroupDesc = "Division A", FixtureTypeId = 1, FixtureTypeDesc = "Division" });
         fakeApi.Fixtures.Add(new Fixture { FixtureId = 100, FixtureGroupIdentifier = 10, HomeTeamName = "Team A", RoadTeamName = "Team B", FixtureDateInMilliseconds = 1730000000000, VenueAndSubVenueDesc = "Main Hall" });
 
-        await gen.RunAsync();
+        await gen.RunAsync("123");
 
         var ics = files.Files.Single().Value;
         ics.Should().StartWith("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LeagueRepublicConsole//EN\r\n");

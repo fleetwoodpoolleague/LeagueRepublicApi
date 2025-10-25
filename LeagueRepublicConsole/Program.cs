@@ -1,47 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
-using LeagueRepublicApi;
+﻿using LeagueRepublicApi;
 using LeagueRepublicConsole;
+using LeagueRepublicConsole.Commands;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using TimeWarp.Mediator;
 using TimeWarp.Nuru;
-
-static async Task<int> RunGeneratorAsync(long? leagueId)
-{
-    // Build configuration: user secrets + optional in-memory override from CLI
-    var config = new ConfigurationBuilder()
-        .AddUserSecrets<Program>()
-        .Build();
-
-    try
-    {
-        var http = new HttpClient();
-        var api = new LeagueRepublicApiClient(http);
-        var files = new PhysicalFileWriter();
-        var generator = new FixturesIcsGenerator(config, api, files);
-        await generator.RunAsync();
-        return 0;
-    }
-    catch (Exception ex)
-    {
-        Console.Error.WriteLine($"LeagueRepublicConsole: {ex.Message}");
-        Console.Error.WriteLine(ex.ToString());
-        return 1;
-    }
-}
 
 var builder = new NuruAppBuilder()
     .AddDependencyInjection()
-    // `ics` with optional positional argument leagueid
-    .AddRoute("ics {leagueid}", async (long leagueid) =>
+    .ConfigureServices(services =>
     {
-        await RunGeneratorAsync(leagueid);
+        var config = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
+        services.AddHttpClient<ILeagueRepublicApiClient, LeagueRepublicApiClient>();
+        services.AddSingleton<IConfiguration>(config);
+        services.AddSingleton<IFileWriter, PhysicalFileWriter>();
+        services.AddSingleton<LeagueRepublicClientOptions>();
+        services.AddTransient<FixturesIcsGenerator>();
+
+        services.AddTransient<IRequestHandler<IcsCommand>, IcsCommand.Handler>();
     })
-    .AddRoute("ics", async () =>
-    {
-        await RunGeneratorAsync(null);
-    });
+    .AddRoute<IcsCommand>(
+        pattern: "ics",
+        description: "Generate ics files for the given league. Assumes a leagueid is configured in user secrets."
+    )
+    .AddRoute<IcsCommand>(
+        pattern: "ics {leagueid}",
+        description: "Generate ics files for the given leagueid."
+    )
+    ;
 
 NuruApp app = builder.Build();
 
