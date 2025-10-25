@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using LeagueRepublicApi;
-using LeagueRepublicIcs;
+using LeagueRepublicConsole;
 using Microsoft.Extensions.Configuration;
 
 var config = new ConfigurationBuilder()
@@ -20,7 +20,7 @@ try
 }
 catch (Exception ex)
 {
-    Console.Error.WriteLine($"LeagueRepublicIcs: {ex.Message}");
+    Console.Error.WriteLine($"LeagueRepublicConsole: {ex.Message}");
     Console.Error.WriteLine(ex.ToString());
     return 1;
 }

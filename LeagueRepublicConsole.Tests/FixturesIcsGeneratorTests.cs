@@ -9,10 +9,10 @@ using LeagueRepublicApi.Models.FixtureGroups;
 using LeagueRepublicApi.Models.Fixtures;
 using LeagueRepublicApi.Models.Seasons;
 using Microsoft.Extensions.Configuration;
-using LeagueRepublicIcs;
+using LeagueRepublicConsole;
 using Xunit;
 
-namespace LeagueRepublicIcs.Tests;
+namespace LeagueRepublicConsole.Tests;
 
 public class FixturesIcsGeneratorTests
 {
@@ -131,7 +131,7 @@ public class FixturesIcsGeneratorTests
         await gen.RunAsync();
 
         var ics = files.Files.Single().Value;
-        ics.Should().StartWith("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LeagueRepublicIcs//EN\r\n");
+        ics.Should().StartWith("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LeagueRepublicConsole//EN\r\n");
         ics.Should().Contain("BEGIN:VEVENT\r\n");
         ics.Should().Contain("SUMMARY:Team A vs Team B\r\n");
         ics.Should().Contain("UID:100@leaguerepublic\r\n");

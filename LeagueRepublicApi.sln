@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueRepublicIcs", "LeagueRepublicIcs\LeagueRepublicIcs.csproj", "{520BAA4E-4CF3-4A41-9C03-20872D16DC13}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueRepublicConsole", "LeagueRepublicConsole\LeagueRepublicConsole.csproj", "{520BAA4E-4CF3-4A41-9C03-20872D16DC13}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueRepublicApi", "LeagueRepublicApi\LeagueRepublicApi.csproj", "{C12FAE2F-AD29-4F80-B9CD-FEA9BF47FD62}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueRepublicApi.Tests", "LeagueRepublicApi.Tests\LeagueRepublicApi.Tests.csproj", "{0B2B6E2A-7C2E-41AF-82E6-2E2B0C5C9D19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueRepublicIcs.Tests", "LeagueRepublicIcs.Tests\LeagueRepublicIcs.Tests.csproj", "{6D53E76A-3ABE-4F4A-9A04-4E28FBCB7C1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeagueRepublicConsole.Tests", "LeagueRepublicConsole.Tests\LeagueRepublicConsole.Tests.csproj", "{6D53E76A-3ABE-4F4A-9A04-4E28FBCB7C1A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -12,7 +12,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../LeagueRepublicIcs/LeagueRepublicIcs.csproj" />
+    <ProjectReference Include="..\LeagueRepublicConsole\LeagueRepublicConsole.csproj" />
     <ProjectReference Include="../LeagueRepublicApi/LeagueRepublicApi.csproj" />
   </ItemGroup>
 </Project>

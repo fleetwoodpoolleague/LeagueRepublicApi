@@ -10,7 +10,7 @@ using LeagueRepublicApi.Models.FixtureGroups;
 using LeagueRepublicApi.Models.Fixtures;
 using Microsoft.Extensions.Configuration;
 
-namespace LeagueRepublicIcs;
+namespace LeagueRepublicConsole;
 
 public interface IFileWriter
 {
@@ -76,7 +76,7 @@ public sealed class FixturesIcsGenerator
         var sb = new StringBuilder();
         sb.Append("BEGIN:VCALENDAR\r\n");
         sb.Append("VERSION:2.0\r\n");
-        sb.Append("PRODID:-//LeagueRepublicIcs//EN\r\n");
+        sb.Append("PRODID:-//LeagueRepublicConsole//EN\r\n");
         foreach (var f in fixtures.OrderBy(f => f.FixtureDateInMilliseconds ?? long.MaxValue))
         {
             sb.Append("BEGIN:VEVENT\r\n");
