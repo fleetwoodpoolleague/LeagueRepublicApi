@@ -9,14 +9,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4bf43956-4ba8-4a62-bf3d-860c04920ea1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/LeagueRepublicConsole/Commands/IcsCommand.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LeagueRepublicConsole/IFileWriter.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LeagueRepublicConsole/PhysicalFileWriter.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.LeagueRepublicIcs/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.LeagueRepublicIcs/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LeagueRepublicConsole.Tests/FixturesIcsGeneratorTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LeagueRepublicConsole.Tests/FixturesIcsGeneratorTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LeagueRepublicConsole/FixturesIcsGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LeagueRepublicConsole/FixturesIcsGenerator.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LeagueRepublicConsole/LeagueRepublicConsole.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/LeagueRepublicConsole/LeagueRepublicConsole.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LeagueRepublicConsole/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LeagueRepublicConsole/Program.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -138,7 +131,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1761331430485</updated>
-      <workItem from="1761331433073" duration="16182000" />
+      <workItem from="1761331433073" duration="17176000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
