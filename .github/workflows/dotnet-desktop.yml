@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: 1
+      DOTNET_VERSION: "10.0.100-rc.2.25502.107"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Try official setup-dotnet first
+      - name: Setup .NET 10 (attempt)
+        id: setup
+        continue-on-error: true
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # Fallback if setup-dotnet doesn’t recognise .NET 10 yet
+      - name: Manual install .NET 10 SDK
+        if: steps.setup.outcome == 'failure'
+        run: |
+          echo "Setup-dotnet failed; installing manually..."
+          SDK_URL="https://dotnetcli.azureedge.net/dotnet/Sdk/${DOTNET_VERSION}/dotnet-sdk-${DOTNET_VERSION}-linux-x64.tar.gz"
+          wget -q $SDK_URL -O dotnet-sdk.tar.gz
+          mkdir -p $HOME/dotnet
+          tar -xzf dotnet-sdk.tar.gz -C $HOME/dotnet
+          echo "$HOME/dotnet" >> $GITHUB_PATH
+          echo "DOTNET_ROOT=$HOME/dotnet" >> $GITHUB_ENV
+          dotnet --version
+
+      # Restore dependencies
+      - name: Restore
+        run: dotnet restore
+
+      # Build
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      # Test (if applicable)
+      - name: Test
+        run: dotnet test --configuration Release --no-restore
+
+      # Publish release binaries
+      - name: Publish
+        run: dotnet publish --configuration Release --output ./publish
