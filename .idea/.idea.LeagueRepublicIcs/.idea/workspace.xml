@@ -10,6 +10,12 @@
   <component name="ChangeListManager">
     <list default="true" id="4bf43956-4ba8-4a62-bf3d-860c04920ea1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.LeagueRepublicIcs/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.LeagueRepublicIcs/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LeagueRepublicConsole.Tests/FixturesIcsGeneratorTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LeagueRepublicConsole.Tests/FixturesIcsGeneratorTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LeagueRepublicConsole/Commands/IcsCommand.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LeagueRepublicConsole/Commands/IcsCommand.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LeagueRepublicConsole/FixturesIcsGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LeagueRepublicConsole/FixturesIcsGenerator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LeagueRepublicConsole/LeagueRepublicConsole.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/LeagueRepublicConsole/LeagueRepublicConsole.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LeagueRepublicConsole/PhysicalFileWriter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LeagueRepublicConsole/PhysicalFileWriter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LeagueRepublicConsole/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/LeagueRepublicConsole/Program.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,7 +137,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1761331430485</updated>
-      <workItem from="1761331433073" duration="17176000" />
+      <workItem from="1761331433073" duration="20162000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -167,19 +173,6 @@
           <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
           <option name="timeStamp" value="3" />
         </breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/LeagueRepublicConsole/FixturesIcsGenerator.cs</url>
-          <line>29</line>
-          <properties documentPath="$PROJECT_DIR$/LeagueRepublicConsole/FixturesIcsGenerator.cs" containingFunctionPresentation="Method 'RunAsync'">
-            <startOffsets>
-              <option value="931" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1014" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

@@ -10,6 +10,7 @@ using LeagueRepublicApi.Models.Fixtures;
 using LeagueRepublicApi.Models.Seasons;
 using Microsoft.Extensions.Configuration;
 using LeagueRepublicConsole;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace LeagueRepublicConsole.Tests;
@@ -70,7 +71,7 @@ public class FixturesIcsGeneratorTests
         var fakeApi = new FakeApiClient();
         var files = new InMemoryFileWriter();
         var config = ConfigWithLeagueId(123);
-        var gen = new FixturesIcsGenerator(config, fakeApi, files);
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, config, fakeApi, files);
 
         fakeApi.Seasons.Add(new Season { SeasonId = 1, SeasonName = "2024/25", CurrentSeason = true });
         fakeApi.Groups.Add(new FixtureGroup { FixtureGroupIdentifier = 10, FixtureGroupDesc = "Division A", FixtureTypeId = 1, FixtureTypeDesc = "Division" });
@@ -95,7 +96,7 @@ public class FixturesIcsGeneratorTests
         var fakeApi = new FakeApiClient();
         var files = new InMemoryFileWriter();
         var config = ConfigWithLeagueId(123);
-        var gen = new FixturesIcsGenerator(config, fakeApi, files);
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, config, fakeApi, files);
 
         fakeApi.Seasons.Add(new Season { SeasonId = 1, SeasonName = "2024/25", CurrentSeason = true });
         fakeApi.Groups.AddRange(new[]
@@ -122,7 +123,7 @@ public class FixturesIcsGeneratorTests
         var fakeApi = new FakeApiClient();
         var files = new InMemoryFileWriter();
         var config = ConfigWithLeagueId(123);
-        var gen = new FixturesIcsGenerator(config, fakeApi, files);
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, config, fakeApi, files);
 
         fakeApi.Seasons.Add(new Season { SeasonId = 1, SeasonName = "2024/25", CurrentSeason = true });
         fakeApi.Groups.Add(new FixtureGroup { FixtureGroupIdentifier = 10, FixtureGroupDesc = "Division A", FixtureTypeId = 1, FixtureTypeDesc = "Division" });
@@ -131,7 +132,7 @@ public class FixturesIcsGeneratorTests
         await gen.RunAsync("123");
 
         var ics = files.Files.Single().Value;
-        ics.Should().StartWith("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LeagueRepublicConsole//EN\r\n");
+        ics.Should().StartWith("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//github.com/sgrassie/LeagueRepublicConsole//EN\r\n");
         ics.Should().Contain("BEGIN:VEVENT\r\n");
         ics.Should().Contain("SUMMARY:Team A vs Team B\r\n");
         ics.Should().Contain("UID:100@leaguerepublic\r\n");

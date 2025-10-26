@@ -1,25 +1,22 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using LeagueRepublicApi;
-using LeagueRepublicApi.Models.FixtureGroups;
 using LeagueRepublicApi.Models.Fixtures;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace LeagueRepublicConsole;
 
 public sealed class FixturesIcsGenerator
 {
+    private readonly ILogger<FixturesIcsGenerator> _logger;
     private readonly IConfiguration _config;
     private readonly ILeagueRepublicApiClient _api;
     private readonly IFileWriter _files;
 
-    public FixturesIcsGenerator(IConfiguration config, ILeagueRepublicApiClient api, IFileWriter files)
+    public FixturesIcsGenerator(ILogger<FixturesIcsGenerator> logger, IConfiguration config, ILeagueRepublicApiClient api, IFileWriter files)
     {
+        _logger = logger;
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _api = api ?? throw new ArgumentNullException(nameof(api));
         _files = files ?? throw new ArgumentNullException(nameof(files));
@@ -35,6 +32,7 @@ public sealed class FixturesIcsGenerator
         if (!long.TryParse(leagueIdStr, out var id ))
             throw new InvalidOperationException("Invalid 'leagueid' configuration value.");
 
+        _logger.LogDebug("Loading seasons for {LeagueId}", leagueId);
         var seasons = await _api.GetSeasonsForLeagueAsync(id);
         var current = seasons.FirstOrDefault(s => s.CurrentSeason) ?? seasons.FirstOrDefault();
         if (current is null)
@@ -67,7 +65,11 @@ public sealed class FixturesIcsGenerator
         var sb = new StringBuilder();
         sb.Append("BEGIN:VCALENDAR\r\n");
         sb.Append("VERSION:2.0\r\n");
-        sb.Append("PRODID:-//LeagueRepublicConsole//EN\r\n");
+        sb.Append("PRODID:-//github.com/sgrassie/LeagueRepublicConsole//EN\r\n");
+        sb.Append("X-WR-CALNAME:").Append(Escape(calendarName)).Append("\r\n");
+        sb.Append("X-WR-TIMEZONE:Europe/London\r\n");
+        sb.Append("CALSCALE:GREGORIAN\r\n");
+        
         foreach (var f in fixtures.OrderBy(f => f.FixtureDateInMilliseconds ?? long.MaxValue))
         {
             sb.Append("BEGIN:VEVENT\r\n");

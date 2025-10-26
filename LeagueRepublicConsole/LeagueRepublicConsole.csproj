@@ -12,6 +12,8 @@
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.10" />
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.10" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.10" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
         <PackageReference Include="TimeWarp.Nuru" Version="2.1.0-beta.25" />
     </ItemGroup>
 
