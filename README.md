@@ -1,3 +1,5 @@
+![CI Status](https://github.com/sgrassie/LeagueRepublicConsole/actions/workflows/dotnet-desktop.yml/badge.svg)
+
 # LeagueRepublic ICS Generator
 
 Generate iCalendar (.ics) files for LeagueRepublic divisions from the public LeagueRepublic API.
