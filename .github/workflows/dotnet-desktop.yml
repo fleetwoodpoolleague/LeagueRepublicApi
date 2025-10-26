@@ -51,12 +51,7 @@ jobs:
 
       # Test (if applicable)
       - name: Test
-        run: |
-          if [ -d "tests" ] || [ -d "test" ]; then
-            dotnet test --no-build --verbosity normal
-          else
-            echo "No test project detected, skipping tests."
-          fi
+        run: dotnet test --configuration Release --no-restore
 
       # Publish release binaries
       - name: Publish
