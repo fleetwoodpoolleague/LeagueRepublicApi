@@ -68,6 +68,12 @@ jobs:
           chmod +x ./publish/LeagueRepublicConsole
           ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}"
 
+      - name: Debug workspace
+        run: |
+           echo "Current directory: $(pwd)"
+           echo "List all .ics files recursively:"
+           find . -type f -name "*.ics" || echo "No .ics files found"
+
       # Copy generated .ics files into the /ics folder
       - name: Move ICS files
         run: |
