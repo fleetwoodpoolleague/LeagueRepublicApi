@@ -66,15 +66,15 @@ jobs:
       - name: Generate ICS files
         run: |
           chmod +x ./publish/LeagueRepublicConsole
-          ./publish/LeagueRepublicConsole
+          ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}"
 
       # Copy generated .ics files into the /ics folder
       - name: Move ICS files
         run: |
-          mkdir -p ./ics
+          mkdir -p ./docs/ics
           find ./publish -maxdepth 1 -type f -name "*.ics" -exec cp {} ./ics/ \;
           echo "Contents of /ics:"
-          ls -l ./ics
+          ls -l ./docs/ics
 
       # Commit the generated .ics files back to the repository
       - name: Commit and push ICS files
@@ -88,8 +88,8 @@ jobs:
           git checkout main
 
           mkdir -p ics
-          cp -r ./ics/* ./ics/ || true
-          git add ics/
+          cp -r ./docs/ics/* ./docs/ics/ || true
+          git add docs/ics/
 
           if git diff --staged --quiet; then
             echo "No changes to commit."
