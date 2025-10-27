@@ -130,6 +130,7 @@ public sealed class FixturesIcsGenerator
     {
         foreach (var c in Path.GetInvalidFileNameChars())
             name = name.Replace(c, '_');
-        return name;
+        
+        return name.Replace(" ", "-");
     }
 }
