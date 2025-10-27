@@ -72,8 +72,8 @@ jobs:
       - name: Move ICS files
         run: |
           mkdir -p ./docs/ics
-          find ./publish -maxdepth 1 -type f -name "*.ics" -exec cp {} ./ics/ \;
-          echo "Contents of /ics:"
+          find ./publish -maxdepth 1 -type f -name "*.ics" -exec cp {} ./docs/ics/ \;
+          echo "Contents of /docs/ics:"
           ls -l ./docs/ics
 
       # Commit the generated .ics files back to the repository
