@@ -83,7 +83,7 @@ public class FixturesIcsGeneratorTests
         fakeApi.GroupCalls.Should().ContainSingle().Which.Should().Be(1);
         fakeApi.FixtureSeasonCalls.Should().ContainSingle().Which.Should().Be(1);
 
-        files.Files.Keys.Should().ContainSingle(k => k.EndsWith("Division A.ics"));
+        files.Files.Keys.Should().ContainSingle(k => k.EndsWith("Division-A.ics"));
         var content = files.Files.Single().Value;
         content.Should().Contain("BEGIN:VCALENDAR");
         content.Should().Contain("BEGIN:VEVENT");
@@ -113,8 +113,8 @@ public class FixturesIcsGeneratorTests
         await gen.RunAsync("123");
 
         files.Files.Keys.Count(k => k.EndsWith(".ics")).Should().Be(2);
-        files.Files.Keys.Should().Contain(k => k.EndsWith("Division A.ics"));
-        files.Files.Keys.Should().Contain(k => k.EndsWith("Division B.ics"));
+        files.Files.Keys.Should().Contain(k => k.EndsWith("Division-A.ics"));
+        files.Files.Keys.Should().Contain(k => k.EndsWith("Division-B.ics"));
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public class FixturesIcsGeneratorTests
         var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, config, fakeApi, files);
 
         fakeApi.Seasons.Add(new Season { SeasonId = 1, SeasonName = "2024/25", CurrentSeason = true });
-        fakeApi.Groups.Add(new FixtureGroup { FixtureGroupIdentifier = 10, FixtureGroupDesc = "Division A", FixtureTypeId = 1, FixtureTypeDesc = "Division" });
+        fakeApi.Groups.Add(new FixtureGroup { FixtureGroupIdentifier = 10, FixtureGroupDesc = "Division-A", FixtureTypeId = 1, FixtureTypeDesc = "Division" });
         fakeApi.Fixtures.Add(new Fixture { FixtureId = 100, FixtureGroupIdentifier = 10, HomeTeamName = "Team A", RoadTeamName = "Team B", FixtureDateInMilliseconds = 1730000000000, VenueAndSubVenueDesc = "Main Hall" });
 
         await gen.RunAsync("123");
