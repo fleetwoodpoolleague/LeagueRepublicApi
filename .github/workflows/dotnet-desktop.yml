@@ -68,32 +68,37 @@ jobs:
           chmod +x ./publish/LeagueRepublicConsole
           ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}"
 
-      # Copy generated .ics files into the /ics folder
-      - name: Move ICS files
+      - name: Debug workspace
         run: |
-          mkdir -p ./docs/ics
-          find ./publish -maxdepth 1 -type f -name "*.ics" -exec cp {} ./ics/ \;
-          echo "Contents of /ics:"
-          ls -l ./docs/ics
-
-      # Commit the generated .ics files back to the repository
-      - name: Commit and push ICS files
+           echo "Current directory: $(pwd)"
+           echo "List all .ics files recursively:"
+           find . -type f -name "*.ics" || echo "No .ics files found"
+          # Push generated ICS files into another repository
+          
+      - name: Push ICS files to target repository
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_REPO_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          TARGET_REPO="fleetwoodpoolleague/Fixtures"  # change this
+          TARGET_DIR="ics"                              # subfolder in target repo
+          BRANCH="main"                                 # or gh-pages etc.
 
-          git fetch origin main
-          git checkout main
+          git config --global user.name "eightball[bot]"
+          git config --global user.email "eightball[bot]@users.noreply.github.com"
 
-          mkdir -p ics
-          cp -r ./docs/ics/* ./docs/ics/ || true
-          git add docs/ics/
+          # Clone the target repo
+          git clone --depth=1 https://x-access-token:${TARGET_REPO_TOKEN}@github.com/${TARGET_REPO}.git target-repo
+          cd target-repo
 
+          mkdir -p "${TARGET_DIR}"
+          rm -f ${TARGET_DIR}/*.ics 2>/dev/null || true
+          cp ./*.ics "${TARGET_DIR}/" || true
+
+          git add "${TARGET_DIR}/"
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "Update generated ICS files"
-            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} main
+            git commit -m "Update generated ICS files from CI"
+            git push origin ${BRANCH}
           fi
+
