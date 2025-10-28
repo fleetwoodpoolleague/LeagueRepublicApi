@@ -92,7 +92,7 @@ jobs:
 
           mkdir -p "${TARGET_DIR}"
           rm -f ${TARGET_DIR}/*.ics 2>/dev/null || true
-          cp ./*.ics "${TARGET_DIR}/" || true
+          cp *.ics "${TARGET_DIR}/" || true
 
           git add "${TARGET_DIR}/"
           if git diff --staged --quiet; then
