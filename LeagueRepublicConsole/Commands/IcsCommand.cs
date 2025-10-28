@@ -8,6 +8,7 @@ namespace LeagueRepublicConsole.Commands;
 public sealed class IcsCommand : IRequest
 {
     public string LeagueId { get; set; } = string.Empty;
+    public string LeagueName { get; set; } = string.Empty;
 
     public sealed class Handler(ILogger<Handler> logger, FixturesIcsGenerator icsGenerator) : IRequestHandler<IcsCommand>
     {
@@ -16,7 +17,7 @@ public sealed class IcsCommand : IRequest
             try
             {
                 logger.LogInformation("Handling ics Command");
-                await icsGenerator.RunAsync(request.LeagueId);
+                await icsGenerator.RunAsync(request.LeagueId, request.LeagueName);
             }
             catch (Exception ex)
             {

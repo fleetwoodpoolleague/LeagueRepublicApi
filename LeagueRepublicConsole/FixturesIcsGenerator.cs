@@ -22,7 +22,7 @@ public sealed class FixturesIcsGenerator
         _files = files ?? throw new ArgumentNullException(nameof(files));
     }
 
-    public async Task RunAsync(string? leagueId)
+    public async Task RunAsync(string? leagueId, string? leagueName)
     {
         var leagueIdStr = string.IsNullOrEmpty(leagueId) ?  _config["leagueid"] : leagueId;
         
@@ -54,19 +54,20 @@ public sealed class FixturesIcsGenerator
         {
             fixturesByGroup.TryGetValue(group.FixtureGroupIdentifier, out var groupFixtures);
             groupFixtures ??= new List<Fixture>();
-            var ics = BuildIcs(group.FixtureGroupDesc ?? $"Group {group.FixtureGroupIdentifier}", groupFixtures);
+            var ics = BuildIcs(leagueName, group.FixtureGroupDesc ?? $"Group {group.FixtureGroupIdentifier}", groupFixtures);
             var safeName = MakeSafeFileName((group.FixtureGroupDesc ?? group.FixtureGroupIdentifier.ToString()) + ".ics");
             _files.WriteAllText(safeName, ics);
         }
     }
 
-    private static string BuildIcs(string calendarName, List<Fixture> fixtures)
+    private static string BuildIcs(string leagueName, string calendarName, List<Fixture> fixtures)
     {
+        var calendarTitle = $"{leagueName}: {Escape(calendarName)}";
         var sb = new StringBuilder();
         sb.Append("BEGIN:VCALENDAR\r\n");
         sb.Append("VERSION:2.0\r\n");
         sb.Append("PRODID:-//github.com/sgrassie/LeagueRepublicConsole//EN\r\n");
-        sb.Append("X-WR-CALNAME:").Append(Escape(calendarName)).Append("\r\n");
+        sb.Append("X-WR-CALNAME:").Append(calendarTitle).Append("\r\n");
         sb.Append("X-WR-TIMEZONE:Europe/London\r\n");
         sb.Append("CALSCALE:GREGORIAN\r\n");
         
