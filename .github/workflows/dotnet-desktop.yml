@@ -66,7 +66,7 @@ jobs:
       - name: Generate ICS files
         run: |
           chmod +x ./publish/LeagueRepublicConsole
-          ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}"
+          ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League"
 
       - name: Debug workspace
         run: |
