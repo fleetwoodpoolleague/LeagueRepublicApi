@@ -17,7 +17,7 @@ Log.Logger.Information("Initialising League Republic Console...");
 
 var builder = new NuruAppBuilder()
         .UseLogging(new SerilogLoggerFactory(Log.Logger))
-        .AddDependencyInjection()
+        .AddDependencyInjection(config => config.RegisterServicesFromAssemblyContaining<Program>())
         .ConfigureServices(services =>
         {
             var config = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
@@ -26,14 +26,16 @@ var builder = new NuruAppBuilder()
             services.AddSingleton<IFileWriter, PhysicalFileWriter>();
             services.AddSingleton<LeagueRepublicClientOptions>();
             services.AddTransient<FixturesIcsGenerator>();
-
-            services.AddTransient<IRequestHandler<IcsCommand>, IcsCommand.Handler>();
+            services.AddTransient<TeamFixturesIcsGenerator>();
         })
         .Map<IcsCommand>(
             pattern: "ics {leagueid?} --league-name {leaguename}",
-            description: "Generate ics files for the given leagueid."
+            description: "Generate an ics file for the given league."
         )
-    ;
+        .Map<TeamIcsCommand>(
+            pattern: "ics team {leagueid?} --league-name {leaguename} --team-name {teamname}",
+            description: "Generate an ics file for the given division and team."
+        );
 
 NuruApp app = builder.Build();
 
