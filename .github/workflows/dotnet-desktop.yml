@@ -70,6 +70,24 @@ jobs:
         run: |
           chmod +x ./publish/LeagueRepublicConsole
           ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Cons A"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Kings Own Comrades"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Ashley"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Strawberry B"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Bug B"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Gardeners Vets"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Sherelles A"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Bar 1"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Wings Club"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Gardeners Arms"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Strawberry Gardens"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Royal Oak A"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Bug A"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Rossall Tavern "
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Tee Time Social Club"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Top Club"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Working Mens Club"
+          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Fleetwood Cons B"
 
       - name: Debug workspace
         run: |
