@@ -29,7 +29,7 @@ var builder = new NuruAppBuilder()
 
             services.AddTransient<IRequestHandler<IcsCommand>, IcsCommand.Handler>();
         })
-        .AddRoute<IcsCommand>(
+        .Map<IcsCommand>(
             pattern: "ics {leagueid?} --league-name {leaguename}",
             description: "Generate ics files for the given leagueid."
         )
