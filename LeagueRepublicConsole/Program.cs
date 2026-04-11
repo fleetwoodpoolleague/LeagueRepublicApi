@@ -1,11 +1,9 @@
 ﻿using LeagueRepublicApi;
 using LeagueRepublicConsole;
-using LeagueRepublicConsole.Commands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Extensions.Logging;
-using TimeWarp.Mediator;
 using TimeWarp.Nuru;
 
 Log.Logger = new LoggerConfiguration()
@@ -15,27 +13,19 @@ Log.Logger = new LoggerConfiguration()
 
 Log.Logger.Information("Initialising League Republic Console...");
 
-var builder = new NuruAppBuilder()
-        .UseLogging(new SerilogLoggerFactory(Log.Logger))
-        .AddDependencyInjection(config => config.RegisterServicesFromAssemblyContaining<Program>())
-        .ConfigureServices(services =>
-        {
-            var config = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
-            services.AddHttpClient<ILeagueRepublicApiClient, LeagueRepublicApiClient>();
-            services.AddSingleton<IConfiguration>(config);
-            services.AddSingleton<IFileWriter, PhysicalFileWriter>();
-            services.AddSingleton<LeagueRepublicClientOptions>();
-            services.AddTransient<FixturesIcsGenerator>();
-            services.AddTransient<TeamFixturesIcsGenerator>();
-        })
-        .Map<IcsCommand>(
-            pattern: "ics {leagueid?} --league-name {leaguename}",
-            description: "Generate an ics file for the given league."
-        )
-        .Map<TeamIcsCommand>(
-            pattern: "ics team {leagueid?} --league-name {leaguename} --team-name {teamname}",
-            description: "Generate an ics file for the given division and team."
-        );
+var builder = NuruApp.CreateBuilder()
+    .UseLogging(new SerilogLoggerFactory(Log.Logger))
+    .DiscoverEndpoints()
+    .ConfigureServices(services =>
+    {
+        var config = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
+        services.AddHttpClient<ILeagueRepublicApiClient, LeagueRepublicApiClient>();
+        services.AddSingleton<IConfiguration>(config);
+        services.AddSingleton<IFileWriter, PhysicalFileWriter>();
+        services.AddSingleton<LeagueRepublicClientOptions>();
+        services.AddTransient<FixturesIcsGenerator>();
+        services.AddTransient<TeamFixturesIcsGenerator>();
+    });
 
 NuruApp app = builder.Build();
 

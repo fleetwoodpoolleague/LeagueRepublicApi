@@ -1,17 +1,21 @@
 using Microsoft.Extensions.Logging;
-using TimeWarp.Mediator;
+using TimeWarp.Nuru;
 
 namespace LeagueRepublicConsole.Commands;
 
-public sealed class TeamIcsCommand : IRequest
+[NuruRoute("ics team {leagueid?} --league-name {leaguename} --team-name {teamname}", Description = "Generate an ics file for the given division and team.")]
+public sealed class TeamIcsCommand : ICommand<Unit>
 {
+    [Parameter(Description = "The league ID of the division to generate ics files.")]
     public string LeagueId { get; set; } = string.Empty;
+    [Parameter(Description = "The league name of the division to generate ics files.")]
     public string LeagueName { get; set; } = string.Empty;
+    [Parameter(Description = "The team name of the division to generate ics files.")]
     public string TeamName { get; set; } = string.Empty;
 
-    public sealed class Handler(ILogger<Handler> logger, TeamFixturesIcsGenerator icsGenerator) : IRequestHandler<TeamIcsCommand>
+    public sealed class Handler(ILogger<Handler> logger, TeamFixturesIcsGenerator icsGenerator) : ICommandHandler<TeamIcsCommand, Unit>
     {
-        public async Task Handle(TeamIcsCommand request, CancellationToken cancellationToken)
+        public async ValueTask<Unit> Handle(TeamIcsCommand request, CancellationToken cancellationToken)
         {
             try
             {
@@ -22,6 +26,8 @@ public sealed class TeamIcsCommand : IRequest
             {
                 logger.LogError(ex, "Unexpected exception attempting to generate ics file(s).");
             }
+
+            return default;
         }
     }
 }
