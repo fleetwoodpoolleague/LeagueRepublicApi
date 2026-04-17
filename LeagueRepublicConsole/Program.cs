@@ -14,18 +14,17 @@ Log.Logger = new LoggerConfiguration()
 Log.Logger.Information("Initialising League Republic Console...");
 
 var builder = NuruApp.CreateBuilder()
-    .UseLogging(new SerilogLoggerFactory(Log.Logger))
-    .DiscoverEndpoints()
     .ConfigureServices(services =>
     {
-        var config = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
+        services.AddLogging(builder => builder.AddSerilog());
         services.AddHttpClient<ILeagueRepublicApiClient, LeagueRepublicApiClient>();
-        services.AddSingleton<IConfiguration>(config);
         services.AddSingleton<IFileWriter, PhysicalFileWriter>();
         services.AddSingleton<LeagueRepublicClientOptions>();
         services.AddTransient<FixturesIcsGenerator>();
         services.AddTransient<TeamFixturesIcsGenerator>();
-    });
+        services.AddTransient<CompetitionsCompletionUpdater>();
+    })
+    .DiscoverEndpoints();
 
 NuruApp app = builder.Build();
 

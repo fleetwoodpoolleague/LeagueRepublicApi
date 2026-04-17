@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:  # allows manual runs
+  workflow_dispatch:
   schedule:
     - cron: '0 9 * * 5'  # Every Friday at 09:00 UTC
 
@@ -20,7 +20,6 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_NOLOGO: 1
-      DOTNET_VERSION: "10.0.100-rc.2.25502.107"
 
     steps:
       - name: Checkout code
@@ -28,86 +27,57 @@ jobs:
         with:
           persist-credentials: false
 
-      # Try official setup-dotnet first
-      - name: Setup .NET 10 (attempt)
-        id: setup
-        continue-on-error: true
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: '10.0.202'
 
-      # Fallback if setup-dotnet doesn’t recognise .NET 10 yet
-      - name: Manual install .NET 10 SDK
-        if: steps.setup.outcome == 'failure'
-        run: |
-          echo "Setup-dotnet failed; installing manually..."
-          SDK_URL="https://dotnetcli.azureedge.net/dotnet/Sdk/${DOTNET_VERSION}/dotnet-sdk-${DOTNET_VERSION}-linux-x64.tar.gz"
-          wget -q $SDK_URL -O dotnet-sdk.tar.gz
-          mkdir -p $HOME/dotnet
-          tar -xzf dotnet-sdk.tar.gz -C $HOME/dotnet
-          echo "$HOME/dotnet" >> $GITHUB_PATH
-          echo "DOTNET_ROOT=$HOME/dotnet" >> $GITHUB_ENV
-          dotnet --version
-
-      # Restore dependencies
       - name: Restore
         run: dotnet restore
 
-      # Build
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      # Test (if applicable)
       - name: Test
         run: dotnet test --configuration Release --no-restore
 
-      # Publish release binaries
       - name: Publish
-        run: dotnet publish --configuration Release --output ./publish
+        run: dotnet publish --configuration Release --no-restore --no-build --output ./publish
 
-      # Run the executable to generate the ICS files
       - name: Generate ICS files
         run: |
           chmod +x ./publish/LeagueRepublicConsole
           ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Cons A"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Kings Own Comrades"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Ashley"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Strawberry B"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Bug B"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Gardeners Vets"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Sherelles A"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Bar 1"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Wings Club"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Gardeners Arms"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Strawberry Gardens"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Royal Oak A"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Bug A"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Rossall Tavern "
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Tee Time Social Club"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Top Club"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Working Mens Club"
-          ./publish/LeagueRepublicConsole ics team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Fleetwood Cons B"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Cons A"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Kings Own Comrades"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Ashley"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Strawberry B"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Bug B"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Gardeners Vets"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Sherelles A"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Bar 1"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Wings Club"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Gardeners Arms"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Strawberry Gardens"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Royal Oak A"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Bug A"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Rossall Tavern"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Tee Time Social Club"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Top Club"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Working Mens Club"
+          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Fleetwood Cons B"
 
-      - name: Debug workspace
-        run: |
-           echo "Current directory: $(pwd)"
-           echo "List all .ics files recursively:"
-           find . -type f -name "*.ics" || echo "No .ics files found"
-          # Push generated ICS files into another repository
-          
       - name: Push ICS files to target repository
         env:
           TARGET_REPO_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
-          TARGET_REPO="fleetwoodpoolleague/Fixtures"  # change this
-          TARGET_DIR="ics"                              # subfolder in target repo
-          BRANCH="main"                                 # or gh-pages etc.
+          TARGET_REPO="fleetwoodpoolleague/Fixtures"
+          TARGET_DIR="ics"
+          BRANCH="main"
 
           git config --global user.name "eightball[bot]"
           git config --global user.email "eightball[bot]@users.noreply.github.com"
 
-          # Clone the target repo
           git clone --depth=1 https://x-access-token:${TARGET_REPO_TOKEN}@github.com/${TARGET_REPO}.git target-repo
           cd target-repo
 
@@ -122,4 +92,3 @@ jobs:
             git commit -m "Update generated ICS files from CI"
             git push origin ${BRANCH}
           fi
-

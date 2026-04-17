@@ -3,14 +3,15 @@ using TimeWarp.Nuru;
 
 namespace LeagueRepublicConsole.Commands;
 
-[NuruRoute("ics team {leagueid?} --league-name {leaguename} --team-name {teamname}", Description = "Generate an ics file for the given division and team.")]
+[NuruRouteGroup("ics")]
+[NuruRoute("team", Description = "Generate an ics file for the given division and team.")]
 public sealed class TeamIcsCommand : ICommand<Unit>
 {
     [Parameter(Description = "The league ID of the division to generate ics files.")]
     public string LeagueId { get; set; } = string.Empty;
-    [Parameter(Description = "The league name of the division to generate ics files.")]
+    [Option("--league-name", "", Description = "The league name of the division to generate ics files.")]
     public string LeagueName { get; set; } = string.Empty;
-    [Parameter(Description = "The team name of the division to generate ics files.")]
+    [Option("--team-name", "", Description = "The team name of the division to generate ics files.")]
     public string TeamName { get; set; } = string.Empty;
 
     public sealed class Handler(ILogger<Handler> logger, TeamFixturesIcsGenerator icsGenerator) : ICommandHandler<TeamIcsCommand, Unit>

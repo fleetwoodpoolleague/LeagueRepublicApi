@@ -56,6 +56,9 @@ public class TeamFixturesIcsGeneratorTests
     {
         public Dictionary<string, string> Files { get; } = new();
         public void WriteAllText(string path, string contents) => Files[path] = contents;
+        public string ReadAllText(string path) => Files[path];
+        public IEnumerable<string> GetFiles(string directory, string searchPattern)
+            => Files.Keys.Where(k => k.StartsWith(directory));
     }
 
     private static IConfiguration ConfigWithLeagueId(long id)

@@ -6,7 +6,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <UserSecretsId>f1e6c9c3-9a5b-4b7f-9a61-2e3c4a1b7d2c</UserSecretsId>
+        <InterceptorsNamespaces>$(InterceptorsNamespaces);TimeWarp.Nuru.Generated</InterceptorsNamespaces>
     </PropertyGroup>
+
+    <ItemGroup>
+        <Using Include="Microsoft.Extensions.Logging" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.5" />
@@ -19,6 +24,12 @@
 
     <ItemGroup>
         <ProjectReference Include="../LeagueRepublicApi/LeagueRepublicApi.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>LeagueRepublicConsole.Tests</_Parameter1>
+        </AssemblyAttribute>
     </ItemGroup>
 
 </Project>
