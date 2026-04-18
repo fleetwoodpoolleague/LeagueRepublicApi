@@ -92,3 +92,23 @@ jobs:
             git commit -m "Update generated ICS files from CI"
             git push origin ${BRANCH}
           fi
+
+      - name: Update fylde8ball data
+        env:
+          FYLDE_REPO_TOKEN: ${{ secrets.FYLDE_EIGHTBALL }}
+        run: |
+          TARGET_REPO="fleetwoodpoolleague/fylde8ball"
+          BRANCH="main"
+
+          git clone --depth=1 https://x-access-token:${FYLDE_REPO_TOKEN}@github.com/${TARGET_REPO}.git fylde8ball-repo
+
+          ./publish/LeagueRepublicConsole update ./fylde8ball-repo/data
+
+          cd fylde8ball-repo
+          git add data/
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Update generated data files from CI"
+            git push origin ${BRANCH}
+          fi
