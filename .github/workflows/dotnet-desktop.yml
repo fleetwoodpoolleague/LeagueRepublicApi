@@ -102,10 +102,10 @@ jobs:
 
           git clone --depth=1 https://x-access-token:${FYLDE_REPO_TOKEN}@github.com/${TARGET_REPO}.git fylde8ball-repo
 
-          ./publish/LeagueRepublicConsole update ./fylde8ball-repo/data
+          ./publish/LeagueRepublicConsole update ./fylde8ball-repo/src/data/tournaments
 
           cd fylde8ball-repo
-          git add data/
+          git add src/data/tournaments
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
