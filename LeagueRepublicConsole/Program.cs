@@ -17,7 +17,7 @@ var builder = NuruApp.CreateBuilder()
     .ConfigureServices(services =>
     {
         services.AddLogging(builder => builder.AddSerilog());
-        services.AddHttpClient<ILeagueRepublicApiClient, LeagueRepublicApiClient>();
+        services.AddSingleton<ILeagueRepublicApiClient, DefaultLeagueRepublicApiClient>();
         services.AddSingleton<IFileWriter, PhysicalFileWriter>();
         services.AddSingleton<LeagueRepublicClientOptions>();
         services.AddTransient<FixturesIcsGenerator>();

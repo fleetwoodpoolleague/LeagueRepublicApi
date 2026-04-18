@@ -13,7 +13,7 @@ namespace LeagueRepublicApi;
 /// <summary>
 /// Concrete implementation of ILeagueRepublicApiClient using HttpClient.
 /// </summary>
-public sealed class LeagueRepublicApiClient : ILeagueRepublicApiClient
+public class LeagueRepublicApiClient : ILeagueRepublicApiClient
 {
     private readonly HttpClient _httpClient;
     private readonly LeagueRepublicClientOptions _options;
