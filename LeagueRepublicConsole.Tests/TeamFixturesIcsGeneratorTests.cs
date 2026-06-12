@@ -109,6 +109,7 @@ public class TeamFixturesIcsGeneratorTests
 
         files.Files.Keys.Should().ContainSingle(k => k.EndsWith("AC_DC-Stars.ics"));
         var ics = files.Files.Single().Value;
-        ics.Should().Contain("X-WR-CALNAME:League X: AC\\/DC Stars");
+        // "/" needs no escaping per RFC 5545
+        ics.Should().Contain("X-WR-CALNAME:League X: AC/DC Stars");
     }
 }

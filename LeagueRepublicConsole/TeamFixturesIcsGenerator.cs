@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Text;
 using LeagueRepublicApi;
 using LeagueRepublicApi.Models.Fixtures;
 using Microsoft.Extensions.Configuration;
@@ -48,83 +46,8 @@ public sealed class TeamFixturesIcsGenerator
                         || string.Equals(f.RoadTeamName, teamName, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        var ics = BuildIcs(leagueName, teamName, teamFixtures);
-        var fileName = MakeSafeFileName(teamName + ".ics");
+        var ics = IcsBuilder.Build(leagueName, teamName, teamFixtures, DateTime.UtcNow);
+        var fileName = IcsBuilder.MakeSafeFileName(teamName + ".ics");
         _files.WriteAllText(fileName, ics);
-    }
-
-    private static string BuildIcs(string leagueName, string teamName, List<Fixture> fixtures)
-    {
-        var calendarTitle = $"{leagueName}: {Escape(teamName)}";
-        var sb = new StringBuilder();
-        sb.Append("BEGIN:VCALENDAR\r\n");
-        sb.Append("VERSION:2.0\r\n");
-        sb.Append("PRODID:-//github.com/sgrassie/LeagueRepublicConsole//EN\r\n");
-        sb.Append("X-WR-CALNAME:").Append(calendarTitle).Append("\r\n");
-        sb.Append("X-WR-TIMEZONE:Europe/London\r\n");
-        sb.Append("CALSCALE:GREGORIAN\r\n");
-
-        foreach (var f in fixtures.OrderBy(f => f.FixtureDateInMilliseconds ?? long.MaxValue))
-        {
-            sb.Append("BEGIN:VEVENT\r\n");
-            var uid = $"{f.FixtureId}@leaguerepublic";
-            sb.Append("UID:").Append(uid).Append("\r\n");
-            var stamp = DateTime.UtcNow;
-            sb.Append("DTSTAMP:").Append(FormatDateTimeUtc(stamp)).Append("\r\n");
-            if (f.FixtureDateInMilliseconds is long ms)
-            {
-                var dt = DateTimeOffset.FromUnixTimeMilliseconds(ms).UtcDateTime;
-                sb.Append("DTSTART:").Append(FormatDateTimeUtc(dt)).Append("\r\n");
-            }
-            var summary = $"{f.HomeTeamName} vs {f.RoadTeamName}";
-            sb.Append("SUMMARY:").Append(Escape(summary)).Append("\r\n");
-            if (!string.IsNullOrWhiteSpace(f.VenueAndSubVenueDesc))
-            {
-                sb.Append("LOCATION:").Append(Escape(f.VenueAndSubVenueDesc!)).Append("\r\n");
-            }
-            var desc = BuildDescription(f);
-            if (!string.IsNullOrEmpty(desc))
-            {
-                sb.Append("DESCRIPTION:").Append(Escape(desc)).Append("\r\n");
-            }
-            sb.Append("END:VEVENT\r\n");
-        }
-        sb.Append("END:VCALENDAR\r\n");
-        return sb.ToString();
-    }
-
-    private static string BuildDescription(Fixture f)
-    {
-        var parts = new List<string>();
-        if (!string.IsNullOrWhiteSpace(f.FixtureNote)) parts.Add(f.FixtureNote!);
-        if (!string.IsNullOrWhiteSpace(f.FixtureStatusDesc)) parts.Add($"Status: {f.FixtureStatusDesc}");
-        if (f.Result)
-        {
-            var score = $"Result: {f.HomeScore ?? ""}-{f.RoadScore ?? ""}".Trim();
-            parts.Add(score);
-        }
-        return string.Join("; ", parts);
-    }
-
-    private static string FormatDateTimeUtc(DateTime dt)
-        => dt.ToUniversalTime().ToString("yyyyMMdd'T'HHmmss'Z'", CultureInfo.InvariantCulture);
-
-    private static string Escape(string value)
-    {
-        // ICS escaping: backslash, comma, semicolon, slash, and newlines
-        return value
-            .Replace("\\", "\\\\")
-            .Replace(";", "\\;")
-            .Replace(",", "\\,")
-            .Replace("/", "\\/")
-            .Replace("\r\n", "\\n")
-            .Replace("\n", "\\n");
-    }
-
-    private static string MakeSafeFileName(string name)
-    {
-        foreach (var c in Path.GetInvalidFileNameChars())
-            name = name.Replace(c, '_');
-        return name.Replace(" ", "-");
     }
 }
