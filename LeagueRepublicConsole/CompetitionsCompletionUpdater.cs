@@ -10,13 +10,14 @@ public sealed class CompetitionsCompletionUpdater(
 {
     private static readonly JsonSerializerOptions WriteOptions = new() { WriteIndented = true };
 
-    public Task RunAsync(string directory, DateOnly? today = null)
+    public Task RunAsync(string directory, DateOnly? today = null, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(directory))
             throw new ArgumentException("Directory must be provided.", nameof(directory));
 
         foreach (var filePath in files.GetFiles(directory, "*.json"))
         {
+            cancellationToken.ThrowIfCancellationRequested();
             logger.LogDebug("Processing {FilePath}", filePath);
             ProcessFile(filePath, today);
         }

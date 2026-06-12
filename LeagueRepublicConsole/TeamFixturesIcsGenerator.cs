@@ -20,18 +20,18 @@ public sealed class TeamFixturesIcsGenerator
         _files = fileWriter ?? throw new ArgumentNullException(nameof(fileWriter));
     }
 
-    public async Task RunAsync(string? leagueId, string leagueName, string teamName)
+    public async Task RunAsync(string? leagueId, string leagueName, string teamName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(teamName))
             throw new ArgumentException("Team name must be provided", nameof(teamName));
 
-        var fixtures = await GetCurrentSeasonFixturesAsync(leagueId);
+        var fixtures = await GetCurrentSeasonFixturesAsync(leagueId, cancellationToken);
         WriteTeamCalendar(leagueName, teamName, fixtures, DateTime.UtcNow);
     }
 
-    public async Task RunAllAsync(string? leagueId, string leagueName)
+    public async Task RunAllAsync(string? leagueId, string leagueName, CancellationToken cancellationToken = default)
     {
-        var fixtures = await GetCurrentSeasonFixturesAsync(leagueId);
+        var fixtures = await GetCurrentSeasonFixturesAsync(leagueId, cancellationToken);
 
         var teamNames = fixtures
             .SelectMany(f => new[] { f.HomeTeamName, f.RoadTeamName })
@@ -46,7 +46,7 @@ public sealed class TeamFixturesIcsGenerator
         }
     }
 
-    private async Task<IReadOnlyList<Fixture>> GetCurrentSeasonFixturesAsync(string? leagueId)
+    private async Task<IReadOnlyList<Fixture>> GetCurrentSeasonFixturesAsync(string? leagueId, CancellationToken cancellationToken)
     {
         var leagueIdStr = string.IsNullOrEmpty(leagueId) ? _config["leagueid"] : leagueId;
         if (string.IsNullOrWhiteSpace(leagueIdStr))
@@ -55,12 +55,12 @@ public sealed class TeamFixturesIcsGenerator
             throw new InvalidOperationException("Invalid 'leagueid' configuration value.");
 
         _logger.LogDebug("Loading seasons for {LeagueId}", id);
-        var seasons = await _api.GetSeasonsForLeagueAsync(id);
+        var seasons = await _api.GetSeasonsForLeagueAsync(id, cancellationToken);
         var current = seasons.FirstOrDefault(s => s.CurrentSeason) ?? seasons.FirstOrDefault();
         if (current is null)
             throw new InvalidOperationException("No seasons returned for league.");
 
-        return await _api.GetFixturesForSeasonAsync(current.SeasonId);
+        return await _api.GetFixturesForSeasonAsync(current.SeasonId, cancellationToken);
     }
 
     private void WriteTeamCalendar(string leagueName, string teamName, IReadOnlyList<Fixture> fixtures, DateTime dtStamp)

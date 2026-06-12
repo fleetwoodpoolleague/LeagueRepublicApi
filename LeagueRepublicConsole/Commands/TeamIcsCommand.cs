@@ -21,7 +21,7 @@ public sealed class TeamIcsCommand : ICommand<Unit>
             try
             {
                 logger.LogInformation("Handling ics Command");
-                await icsGenerator.RunAsync(request.LeagueId, request.LeagueName, request.TeamName);
+                await icsGenerator.RunAsync(request.LeagueId, request.LeagueName, request.TeamName, cancellationToken);
             }
             catch (Exception ex)
             {

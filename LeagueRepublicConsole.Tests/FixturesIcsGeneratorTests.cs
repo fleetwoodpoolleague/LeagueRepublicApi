@@ -26,20 +26,25 @@ public class FixturesIcsGeneratorTests
         public Task<IReadOnlyList<Season>> GetSeasonsForLeagueAsync(long? leagueId = null, CancellationToken cancellationToken = default)
         {
             LeagueIdCalls.Add(leagueId);
+            ReceivedTokens.Add(cancellationToken);
             return Task.FromResult((IReadOnlyList<Season>)Seasons);
         }
 
         public Task<IReadOnlyList<FixtureGroup>> GetFixtureGroupsForSeasonAsync(long seasonId, CancellationToken cancellationToken = default)
         {
             GroupCalls.Add(seasonId);
+            ReceivedTokens.Add(cancellationToken);
             return Task.FromResult((IReadOnlyList<FixtureGroup>)Groups);
         }
 
         public Task<IReadOnlyList<Fixture>> GetFixturesForSeasonAsync(long seasonId, CancellationToken cancellationToken = default)
         {
             FixtureSeasonCalls.Add(seasonId);
+            ReceivedTokens.Add(cancellationToken);
             return Task.FromResult((IReadOnlyList<Fixture>)Fixtures);
         }
+
+        public List<CancellationToken> ReceivedTokens { get; } = new();
 
         public Task<IReadOnlyList<Fixture>> GetFixturesForFixtureGroupAsync(long fixtureGroupIdentifier, CancellationToken cancellationToken = default)
         {
@@ -118,6 +123,21 @@ public class FixturesIcsGeneratorTests
         files.Files.Keys.Count(k => k.EndsWith(".ics")).Should().Be(2);
         files.Files.Keys.Should().Contain(k => k.EndsWith("Division-A.ics"));
         files.Files.Keys.Should().Contain(k => k.EndsWith("Division-B.ics"));
+    }
+
+    [Fact]
+    public async Task Forwards_CancellationToken_To_Api_Calls()
+    {
+        var fakeApi = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var config = ConfigWithLeagueId(123);
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, config, fakeApi, files);
+        fakeApi.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true });
+
+        using var cts = new CancellationTokenSource();
+        await gen.RunAsync("123", "Test League", cts.Token);
+
+        fakeApi.ReceivedTokens.Should().HaveCount(3).And.AllSatisfy(t => t.Should().Be(cts.Token));
     }
 
     [Fact]

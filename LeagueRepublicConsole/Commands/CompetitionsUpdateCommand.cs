@@ -18,7 +18,7 @@ public sealed class CompetitionsUpdateCommand : ICommand<Unit>
             try
             {
                 logger.LogInformation("Handling competitions update for directory: {Directory}", request.Directory);
-                await updater.RunAsync(request.Directory);
+                await updater.RunAsync(request.Directory, cancellationToken: cancellationToken);
             }
             catch (Exception ex)
             {

@@ -19,7 +19,7 @@ public sealed class TeamsIcsCommand : ICommand<Unit>
             try
             {
                 logger.LogInformation("Handling teams ics Command");
-                await icsGenerator.RunAllAsync(request.LeagueId, request.LeagueName);
+                await icsGenerator.RunAllAsync(request.LeagueId, request.LeagueName, cancellationToken);
             }
             catch (Exception ex)
             {

@@ -25,8 +25,11 @@ public class TeamFixturesIcsGeneratorTests
         public Task<IReadOnlyList<Season>> GetSeasonsForLeagueAsync(long? leagueId = null, CancellationToken cancellationToken = default)
         {
             LeagueIdCalls.Add(leagueId);
+            ReceivedTokens.Add(cancellationToken);
             return Task.FromResult((IReadOnlyList<Season>)Seasons);
         }
+
+        public List<CancellationToken> ReceivedTokens { get; } = new();
 
         public Task<IReadOnlyList<FixtureGroup>> GetFixtureGroupsForSeasonAsync(long seasonId, CancellationToken cancellationToken = default)
         {
@@ -138,6 +141,21 @@ public class TeamFixturesIcsGeneratorTests
 
         files.Files.Keys.Should().HaveCount(2);
         files.Files["Alpha.ics"].Should().Contain("SUMMARY:Alpha vs Beta").And.Contain("SUMMARY:ALPHA vs Beta");
+    }
+
+    [Fact]
+    public async Task Forwards_CancellationToken_To_Api_Calls()
+    {
+        var api = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var cfg = ConfigWithLeagueId(77);
+        var gen = new TeamFixturesIcsGenerator(NullLogger<TeamFixturesIcsGenerator>.Instance, cfg, api, files);
+        api.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true });
+
+        using var cts = new CancellationTokenSource();
+        await gen.RunAsync("77", "League X", "Alpha", cts.Token);
+
+        api.ReceivedTokens.Should().NotBeEmpty().And.AllSatisfy(t => t.Should().Be(cts.Token));
     }
 
     [Fact]

@@ -20,7 +20,7 @@ public sealed class IcsCommand : ICommand<Unit>
             try
             {
                 logger.LogInformation("Handling ics Command");
-                await icsGenerator.RunAsync(request.LeagueId, request.LeagueName);
+                await icsGenerator.RunAsync(request.LeagueId, request.LeagueName, cancellationToken);
             }
             catch (Exception ex)
             {

@@ -20,7 +20,7 @@ public sealed class FixturesIcsGenerator
         _files = files ?? throw new ArgumentNullException(nameof(files));
     }
 
-    public async Task RunAsync(string? leagueId, string? leagueName)
+    public async Task RunAsync(string? leagueId, string? leagueName, CancellationToken cancellationToken = default)
     {
         var leagueIdStr = string.IsNullOrEmpty(leagueId) ?  _config["leagueid"] : leagueId;
         
@@ -31,14 +31,14 @@ public sealed class FixturesIcsGenerator
             throw new InvalidOperationException("Invalid 'leagueid' configuration value.");
 
         _logger.LogDebug("Loading seasons for {LeagueId}", leagueId);
-        var seasons = await _api.GetSeasonsForLeagueAsync(id);
+        var seasons = await _api.GetSeasonsForLeagueAsync(id, cancellationToken);
         var current = seasons.FirstOrDefault(s => s.CurrentSeason) ?? seasons.FirstOrDefault();
         if (current is null)
             throw new InvalidOperationException("No seasons returned for league.");
 
         var seasonId = current.SeasonId;
-        var groupsTask = _api.GetFixtureGroupsForSeasonAsync(seasonId);
-        var fixturesTask = _api.GetFixturesForSeasonAsync(seasonId);
+        var groupsTask = _api.GetFixtureGroupsForSeasonAsync(seasonId, cancellationToken);
+        var fixturesTask = _api.GetFixturesForSeasonAsync(seasonId, cancellationToken);
         await Task.WhenAll(groupsTask, fixturesTask);
         var groups = await groupsTask;
         var fixtures = await fixturesTask;
