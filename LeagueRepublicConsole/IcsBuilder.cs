@@ -12,7 +12,9 @@ public static class IcsBuilder
 {
     public static string Build(string? leagueName, string calendarName, IEnumerable<Fixture> fixtures, DateTime dtStampUtc)
     {
-        var calendarTitle = $"{leagueName}: {Escape(calendarName)}";
+        var calendarTitle = string.IsNullOrWhiteSpace(leagueName)
+            ? Escape(calendarName)
+            : $"{Escape(leagueName)}: {Escape(calendarName)}";
         var sb = new StringBuilder();
         sb.Append("BEGIN:VCALENDAR\r\n");
         sb.Append("VERSION:2.0\r\n");

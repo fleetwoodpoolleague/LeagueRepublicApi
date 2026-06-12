@@ -23,6 +23,16 @@ public class IcsBuilderTests
         ics.Should().EndWith("END:VCALENDAR\r\n");
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    public void Build_Omits_League_Prefix_When_League_Name_Missing(string? leagueName)
+    {
+        var ics = IcsBuilder.Build(leagueName, "Division A", new List<Fixture>(), Stamp);
+        ics.Should().Contain("X-WR-CALNAME:Division A\r\n");
+    }
+
     [Fact]
     public void Escape_Handles_Rfc5545_Special_Characters()
     {
