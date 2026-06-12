@@ -1,123 +1,207 @@
-![CI Status](https://github.com/sgrassie/LeagueRepublicConsole/actions/workflows/dotnet-desktop.yml/badge.svg)
+[![CI Status](https://github.com/fleetwoodpoolleague/LeagueRepublicApi/actions/workflows/dotnet-desktop.yml/badge.svg)](https://github.com/fleetwoodpoolleague/LeagueRepublicApi/actions/workflows/dotnet-desktop.yml)
 
 # LeagueRepublic ICS Generator
 
-Generate iCalendar (.ics) files for LeagueRepublic divisions from the public LeagueRepublic API.
+A .NET CLI tool that fetches fixture data from the [LeagueRepublic](https://www.leaguerepublic.com) API and generates RFC 5545-compliant `.ics` calendar files. Used by the Fleetwood Pool League to publish fixtures to calendar apps, with daily generation via GitHub Actions.
 
 ## Disclaimer
 
-This project is unofficial and not affiliated, associated, authorized, endorsed by, or in any way officially connected with League Republic, or any of its subsidiaries or affiliates.
-All product and company names are trademarks™ or registered® trademarks of their respective holders.
-Use of these names, trademarks, and brands does not imply endorsement.
+This project is unofficial and not affiliated with, associated with, authorized, endorsed by, or in any way officially connected with League Republic or any of its subsidiaries or affiliates. All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of these names, trademarks, and brands does not imply endorsement.
 
-This project makes use of the public League Republic API, but is an independent implementation. The maintainers of this project are not responsible for any changes or downtime of the official API.
+This project uses the public League Republic API as an independent implementation. The maintainers are not responsible for any changes or downtime of the official API.
 
-# Introduction
+## Features
 
-This solution contains:
-- LeagueRepublicApi — a small HTTP client for LeagueRepublic endpoints used by the tool
-- LeagueRepublicConsole — a console app that outputs .ics files per division
-- Unit tests for both projects
+- Generate a calendar file per division for an entire league
+- Generate a calendar file for a single team (home and away fixtures)
+- Generate calendar files for every team in a league from a single fixtures fetch
+- Automatically mark past tournament dates as completed in JSON data files, including multi-day competitions with an end date
 
-Example output files:
-- Division 1.ics
-- Division 2.ics
+## Solution Structure
+
+| Project | Description |
+|---|---|
+| `LeagueRepublicApi` | Typed HTTP client library wrapping the LeagueRepublic JSON API |
+| `LeagueRepublicConsole` | CLI executable — generates `.ics` files and updates tournament data |
+| `LeagueRepublicApi.Tests` | Unit tests for the API client |
+| `LeagueRepublicConsole.Tests` | Unit tests for the generators and updater |
 
 ## Prerequisites
-- .NET SDK 10.0 or later installed
-- Internet access to reach https://api.leaguerepublic.com
 
-## Quick Start
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- Internet access to reach `https://api.leaguerepublic.com`
 
-1) Clone the repository
-- git clone https://github.com/<your-org-or-user>/LeagueRepublicIcs.git
-- cd LeagueRepublicIcs
+> The LeagueRepublic API must be enabled in the league's admin settings. The league ID shown there acts as the API key.
 
-2) Restore and build
-- dotnet build
+## Building and Testing
 
-3) Configure a default league id (optional)
-The console app reads configuration from .NET User Secrets. You can set a default league id so you don’t have to pass it on every run.
+```bash
+# Build
+dotnet build
 
-- cd LeagueRepublicConsole
-- dotnet user-secrets init
-- dotnet user-secrets set "leagueid" "<your-league-id>"
+# Run all tests
+dotnet test
 
-4) Run
-- Using default league id from user-secrets:
-  - dotnet run -- ics
-- Passing a league id explicitly (overrides user-secret):
-  - dotnet run -- ics 123456
+# Run tests for a specific project
+dotnet test LeagueRepublicConsole.Tests
+dotnet test LeagueRepublicApi.Tests
+```
 
-Output .ics files will be written to the working directory (repository root if run from solution root, or the console project directory if run there).
+## Commands
 
-Notes:
-- Two equivalent routes are available in the app:
-  - ics
-  - ics {leagueid}
-- If no seasons are found for a league, the app will report an error.
+### `ics` — Generate per-division calendars
 
-## Project Details
+Generates one `.ics` file per division for the given league, written to the current directory.
 
-### LeagueRepublicApi
-- Provides typed methods for the following endpoints:
-  - json/getSeasonsForLeague/{leagueId}.json
-  - json/getFixtureGroupsForSeason/{seasonId}.json
-  - json/getFixturesForSeason/{seasonId}.json
-  - json/getFixturesForFixtureGroup/{fixtureGroupIdentifier}.json
-- Default base URL: https://api.leaguerepublic.com (configurable through LeagueRepublicClientOptions)
+```
+ics <leagueId> [--league-name <name>]
+```
 
-### LeagueRepublicConsole
-- Binds routes using TimeWarp.Nuru
-- Command: ics [leagueid]
-- Generates an .ics file per division for the current season (falls back to the first season if none marked current)
-- Writes UTF-8 files without BOM
+| Argument | Required | Description |
+|---|---|---|
+| `leagueId` | Yes (or via user secrets) | LeagueRepublic league ID |
+| `--league-name` | No | Sets the `X-WR-CALNAME` prefix in each calendar |
+
+```bash
+dotnet run --project LeagueRepublicConsole -- ics 123456
+dotnet run --project LeagueRepublicConsole -- ics 123456 --league-name "Fleetwood Pool League"
+```
+
+Output files are written to the current directory, one per division (e.g. `Division-1.ics`, `Division-2.ics`).
+
+### `team` — Generate a per-team calendar
+
+Generates a single `.ics` file containing all fixtures (home and away) for the named team.
+
+```
+team <leagueId> [--league-name <name>] --team-name <name>
+```
+
+| Argument | Required | Description |
+|---|---|---|
+| `leagueId` | Yes (or via user secrets) | LeagueRepublic league ID |
+| `--league-name` | No | Sets the `X-WR-CALNAME` in the calendar |
+| `--team-name` | Yes | Team name to filter fixtures for (case-insensitive) |
+
+```bash
+dotnet run --project LeagueRepublicConsole -- team 123456 \
+  --league-name "Fleetwood Pool League" \
+  --team-name "Cons A"
+```
+
+### `teams` — Generate calendars for every team
+
+Discovers every distinct team name from the current season's fixtures and writes one `.ics` file per team, using a single fixtures fetch.
+
+```
+teams <leagueId> [--league-name <name>]
+```
+
+| Argument | Required | Description |
+|---|---|---|
+| `leagueId` | Yes (or via user secrets) | LeagueRepublic league ID |
+| `--league-name` | No | Sets the `X-WR-CALNAME` prefix in each calendar |
+
+```bash
+dotnet run --project LeagueRepublicConsole -- teams 123456 --league-name "Fleetwood Pool League"
+```
+
+### `update` — Mark completed tournament dates
+
+Scans a directory of JSON tournament files and sets `"completed": true` on any dates that have passed. Entries with an `"endDate"` (multi-day competitions) are only completed once the end date has passed; entries with an unparseable date (e.g. `"TBC"`) are left alone, and files that fail to parse are skipped with a warning. If all dates in a file are complete, the root-level `"completed"` flag is also set.
+
+```
+update <directory>
+```
+
+| Argument | Required | Description |
+|---|---|---|
+| `directory` | Yes | Path to directory containing `*.json` tournament files |
+
+```bash
+dotnet run --project LeagueRepublicConsole -- update /path/to/tournaments
+```
 
 ## Configuration
 
-In order to call the API, the League Republic site must have the API enabled in the admin section. This is where the league id can be found. The league id appears to act as the API key for the League Republic API.
+### Setting a default league ID (user secrets)
 
-- leagueid (string):
-  - When omitted from the command line, the app reads this from User Secrets.
-  - Example user-secrets.json (managed by the CLI, do not edit manually):
-    {
-      "leagueid": "123456"
-    }
+To avoid passing the league ID on every invocation, store it as a user secret:
 
-## Running Tests
-- dotnet test
+```bash
+cd LeagueRepublicConsole
+dotnet user-secrets set "leagueid" "<your-league-id>"
+```
+
+User secrets are loaded when `DOTNET_ENVIRONMENT=Development` is set:
+
+```bash
+DOTNET_ENVIRONMENT=Development dotnet run --project LeagueRepublicConsole -- ics
+```
+
+## How ICS Generation Works
+
+All generators follow the same flow:
+
+1. Resolve the league ID from the CLI argument or user secrets
+2. Fetch seasons from the API; select the one marked `CurrentSeason = true`, falling back to the first in the list
+3. Fetch fixture groups and fixtures for the selected season (concurrently, for the `ics` command)
+4. Filter — the `ics` command keeps only groups where `FixtureTypeId == 1` (league divisions); the `team` and `teams` commands filter fixtures by team name (case-insensitive, home or away)
+5. Build RFC 5545 `VCALENDAR` content using `\r\n` line endings and correct property escaping (shared `IcsBuilder`)
+6. Write UTF-8 (no BOM) `.ics` files via `IFileWriter`
+
+Each fixture becomes a `VEVENT` with:
+
+| ICS Property | Value |
+|---|---|
+| `UID` | `{fixtureId}@leaguerepublic` |
+| `SUMMARY` | `{HomeTeam} vs {AwayTeam}` |
+| `DTSTART` | UTC datetime converted from the API's Unix millisecond timestamp |
+| `LOCATION` | Venue name (when present) |
+| `DESCRIPTION` | Result, status, and any fixture notes |
+
+## Architecture Notes
+
+**Command routing** uses [TimeWarp.Nuru](https://github.com/TimeWarpEngineering/timewarp-nuru), a source-generator–based CLI framework. Commands are decorated with `[NuruRoute]` and discovered at compile time via `DiscoverEndpoints()`. The generator intercepts `app.RunAsync()` and emits static dispatch code — no runtime reflection.
+
+**Testability** is provided by the `IFileWriter` and `ILeagueRepublicApiClient` interfaces. Tests use hand-rolled fakes (`InMemoryFileWriter`, `FakeApiClient`) rather than a mocking framework.
+
+**HttpClient** is wrapped in a `DefaultLeagueRepublicApiClient` subclass with a constructor that Nuru's AOT service construction can resolve without `IHttpClientFactory`.
+
+## CI/CD
+
+GitHub Actions runs on every push and pull request to `main`, on manual dispatch, and on a daily schedule at 01:00 UTC. The workflow:
+
+1. Builds and tests in Release configuration
+2. Publishes the CLI binary
+3. Runs `ics` for the configured league and `teams` for all of its teams
+4. Pushes the generated `.ics` files to the [Fixtures repository](https://github.com/fleetwoodpoolleague/Fixtures)
+5. Runs `update` against the tournament data and pushes any changes to the [fylde8ball repository](https://github.com/fleetwoodpoolleague/fylde8ball)
+
+Commands exit with a non-zero status on failure, so a broken API or bad configuration fails the build rather than silently publishing nothing.
+
+**Required secrets:**
+
+| Secret | Purpose |
+|---|---|
+| `LEAGUE_ID` | LeagueRepublic league identifier |
+| `PUSH_TOKEN` | GitHub token with write access to the Fixtures repo |
+| `FYLDE_EIGHTBALL` | GitHub token with write access to the fylde8ball repo |
 
 ## Troubleshooting
-- Error: Missing 'leagueid' configuration value.
-  - Set the league id in User Secrets or pass it as a command argument: dotnet run -- ics 123456
-- No seasons returned for league.
-  - Verify the league id is correct and that the API is reachable.
 
-## Development Notes
-- Target framework: net10.0
-- Uses Microsoft.Extensions.Http for HttpClient and dependency injection
-- Uses TimeWarp.Mediator and TimeWarp.Nuru for command routing and handling
+**"Missing 'leagueid' configuration value"** — Set the league ID in user secrets or pass it explicitly: `dotnet run --project LeagueRepublicConsole -- ics 123456`
+
+**No seasons returned** — Verify the league ID is correct and the API is enabled in the league's admin settings.
+
+**User secrets not loaded** — Ensure `DOTNET_ENVIRONMENT=Development` is set in your environment.
 
 ## License
 
-MIT License
+MIT License — Copyright (c) 2025 Stuart Grassie
 
-Copyright (c) 2025 Stuart Grassie
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
