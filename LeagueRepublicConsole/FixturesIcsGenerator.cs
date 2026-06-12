@@ -37,8 +37,11 @@ public sealed class FixturesIcsGenerator
             throw new InvalidOperationException("No seasons returned for league.");
 
         var seasonId = current.SeasonId;
-        var groups = await _api.GetFixtureGroupsForSeasonAsync(seasonId);
-        var fixtures = await _api.GetFixturesForSeasonAsync(seasonId);
+        var groupsTask = _api.GetFixtureGroupsForSeasonAsync(seasonId);
+        var fixturesTask = _api.GetFixturesForSeasonAsync(seasonId);
+        await Task.WhenAll(groupsTask, fixturesTask);
+        var groups = await groupsTask;
+        var fixtures = await fixturesTask;
 
         // Only include groups that are divisions (FixtureTypeId == 1) if such info exists
         var divisionGroups = groups.Where(g => g.FixtureTypeId == 1).ToList();
