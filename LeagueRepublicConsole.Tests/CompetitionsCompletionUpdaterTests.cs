@@ -149,6 +149,130 @@ public class CompetitionsCompletionUpdaterTests
         changed.Should().BeTrue();
     }
 
+    // ── UpdateCompletionStatus (multi-day entries with endDate) ──────────────
+
+    [Fact]
+    public void UpdateCompletionStatus_Does_Not_Complete_Entry_When_EndDate_Is_In_Future()
+    {
+        var json = """
+        {
+            "completed": false,
+            "dates": [
+                { "name": "Novice Series", "date": "2026-06-11", "endDate": "2026-06-14", "completed": false }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        var changed = CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 6, 12));
+        changed.Should().BeFalse();
+        root["dates"]![0]!["completed"]!.GetValue<bool>().Should().BeFalse();
+    }
+
+    [Fact]
+    public void UpdateCompletionStatus_Does_Not_Complete_Entry_On_Its_EndDate()
+    {
+        var json = """
+        {
+            "completed": false,
+            "dates": [
+                { "name": "Novice Series", "date": "2026-06-11", "endDate": "2026-06-14", "completed": false }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        var changed = CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 6, 14));
+        changed.Should().BeFalse();
+        root["dates"]![0]!["completed"]!.GetValue<bool>().Should().BeFalse();
+    }
+
+    [Fact]
+    public void UpdateCompletionStatus_Completes_Entry_When_EndDate_Is_Past()
+    {
+        var json = """
+        {
+            "completed": false,
+            "dates": [
+                { "name": "Novice Series", "date": "2026-06-11", "endDate": "2026-06-14", "completed": false }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        var changed = CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 6, 15));
+        changed.Should().BeTrue();
+        root["dates"]![0]!["completed"]!.GetValue<bool>().Should().BeTrue();
+    }
+
+    [Fact]
+    public void UpdateCompletionStatus_Skips_Entry_With_Unparseable_EndDate()
+    {
+        var json = """
+        {
+            "completed": false,
+            "dates": [
+                { "name": "Novice Series", "date": "2026-06-11", "endDate": "TBC", "completed": false }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        var changed = CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 6, 20));
+        changed.Should().BeFalse();
+        root["dates"]![0]!["completed"]!.GetValue<bool>().Should().BeFalse();
+    }
+
+    [Fact]
+    public void UpdateCompletionStatus_Falls_Back_To_Date_When_EndDate_Is_Null()
+    {
+        var json = """
+        {
+            "completed": false,
+            "dates": [
+                { "name": "Week 1", "date": "2026-04-15", "endDate": null, "completed": false }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        var changed = CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 4, 17));
+        changed.Should().BeTrue();
+        root["dates"]![0]!["completed"]!.GetValue<bool>().Should().BeTrue();
+    }
+
+    [Fact]
+    public void UpdateCompletionStatus_Sets_Root_Completed_When_All_MultiDay_Entries_Done()
+    {
+        var json = """
+        {
+            "completed": false,
+            "dates": [
+                { "name": "Novice Series", "date": "2026-06-11", "endDate": "2026-06-14", "completed": false },
+                { "name": "Pro-Am Series", "date": "2026-06-18", "endDate": "2026-06-21", "completed": false }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 6, 22));
+        root["completed"]!.GetValue<bool>().Should().BeTrue();
+    }
+
+    [Fact]
+    public void UpdateCompletionStatus_Does_Not_Set_Root_Completed_While_Later_MultiDay_Entry_Pending()
+    {
+        var json = """
+        {
+            "completed": false,
+            "dates": [
+                { "name": "Novice Series", "date": "2026-06-11", "endDate": "2026-06-14", "completed": false },
+                { "name": "Pro-Am Series", "date": "2026-06-18", "endDate": "2026-06-21", "completed": false }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        var changed = CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 6, 16));
+        changed.Should().BeTrue();
+        root["dates"]![0]!["completed"]!.GetValue<bool>().Should().BeTrue();
+        root["dates"]![1]!["completed"]!.GetValue<bool>().Should().BeFalse();
+        root["completed"]!.GetValue<bool>().Should().BeFalse();
+    }
+
     // ── ProcessFile (idempotency and write gate) ──────────────────────────────
 
     [Fact]

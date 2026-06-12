@@ -63,6 +63,14 @@ public sealed class CompetitionsCompletionUpdater(
             if (dateStr is null) continue;
             if (!DateOnly.TryParse(dateStr, out var entryDate)) continue; // "TBC" etc.
 
+            // Multi-day entries carry an endDate; completion waits for the final day
+            var endDateStr = entry["endDate"]?.GetValue<string>();
+            if (endDateStr is not null)
+            {
+                if (!DateOnly.TryParse(endDateStr, out var endDate)) continue;
+                entryDate = endDate;
+            }
+
             if (entryDate < today)
             {
                 entry["completed"] = true;
