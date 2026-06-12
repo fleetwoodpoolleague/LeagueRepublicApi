@@ -25,6 +25,29 @@ public sealed class TeamFixturesIcsGenerator
         if (string.IsNullOrWhiteSpace(teamName))
             throw new ArgumentException("Team name must be provided", nameof(teamName));
 
+        var fixtures = await GetCurrentSeasonFixturesAsync(leagueId);
+        WriteTeamCalendar(leagueName, teamName, fixtures, DateTime.UtcNow);
+    }
+
+    public async Task RunAllAsync(string? leagueId, string leagueName)
+    {
+        var fixtures = await GetCurrentSeasonFixturesAsync(leagueId);
+
+        var teamNames = fixtures
+            .SelectMany(f => new[] { f.HomeTeamName, f.RoadTeamName })
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase);
+
+        var dtStamp = DateTime.UtcNow;
+        foreach (var teamName in teamNames)
+        {
+            WriteTeamCalendar(leagueName, teamName, fixtures, dtStamp);
+        }
+    }
+
+    private async Task<IReadOnlyList<Fixture>> GetCurrentSeasonFixturesAsync(string? leagueId)
+    {
         var leagueIdStr = string.IsNullOrEmpty(leagueId) ? _config["leagueid"] : leagueId;
         if (string.IsNullOrWhiteSpace(leagueIdStr))
             throw new InvalidOperationException("Missing 'leagueid' configuration value.");
@@ -37,16 +60,18 @@ public sealed class TeamFixturesIcsGenerator
         if (current is null)
             throw new InvalidOperationException("No seasons returned for league.");
 
-        var seasonId = current.SeasonId;
-        var fixtures = await _api.GetFixturesForSeasonAsync(seasonId);
+        return await _api.GetFixturesForSeasonAsync(current.SeasonId);
+    }
 
+    private void WriteTeamCalendar(string leagueName, string teamName, IReadOnlyList<Fixture> fixtures, DateTime dtStamp)
+    {
         // Filter fixtures where the given team participates (home or away)
         var teamFixtures = fixtures
             .Where(f => string.Equals(f.HomeTeamName, teamName, StringComparison.OrdinalIgnoreCase)
                         || string.Equals(f.RoadTeamName, teamName, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        var ics = IcsBuilder.Build(leagueName, teamName, teamFixtures, DateTime.UtcNow);
+        var ics = IcsBuilder.Build(leagueName, teamName, teamFixtures, dtStamp);
         var fileName = IcsBuilder.MakeSafeFileName(teamName + ".ics");
         _files.WriteAllText(fileName, ics);
     }

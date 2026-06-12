@@ -95,6 +95,52 @@ public class TeamFixturesIcsGeneratorTests
     }
 
     [Fact]
+    public async Task RunAllAsync_Writes_One_File_Per_Distinct_Team_With_Single_Fixture_Fetch()
+    {
+        var api = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var cfg = ConfigWithLeagueId(77);
+        var gen = new TeamFixturesIcsGenerator(NullLogger<TeamFixturesIcsGenerator>.Instance, cfg, api, files);
+
+        api.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true, SeasonName = "2024/25" });
+        api.Fixtures.AddRange(new[]
+        {
+            new Fixture { FixtureId = 1, FixtureGroupIdentifier = 10, HomeTeamName = "Alpha", RoadTeamName = "Beta", FixtureDateInMilliseconds = 1730000000000 },
+            new Fixture { FixtureId = 2, FixtureGroupIdentifier = 10, HomeTeamName = "Gamma", RoadTeamName = "Alpha", FixtureDateInMilliseconds = 1730003600000 }
+        });
+
+        await gen.RunAllAsync("77", "League X");
+
+        files.Files.Keys.Should().BeEquivalentTo("Alpha.ics", "Beta.ics", "Gamma.ics");
+        files.Files["Alpha.ics"].Should().Contain("SUMMARY:Alpha vs Beta").And.Contain("SUMMARY:Gamma vs Alpha");
+        files.Files["Beta.ics"].Should().Contain("SUMMARY:Alpha vs Beta").And.NotContain("SUMMARY:Gamma vs Alpha");
+        files.Files["Gamma.ics"].Should().Contain("SUMMARY:Gamma vs Alpha").And.NotContain("SUMMARY:Alpha vs Beta");
+
+        api.FixtureSeasonCalls.Should().ContainSingle("all team calendars should come from one fixtures fetch");
+    }
+
+    [Fact]
+    public async Task RunAllAsync_Deduplicates_Team_Names_Differing_Only_By_Case()
+    {
+        var api = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var cfg = ConfigWithLeagueId(77);
+        var gen = new TeamFixturesIcsGenerator(NullLogger<TeamFixturesIcsGenerator>.Instance, cfg, api, files);
+
+        api.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true });
+        api.Fixtures.AddRange(new[]
+        {
+            new Fixture { FixtureId = 1, FixtureGroupIdentifier = 10, HomeTeamName = "Alpha", RoadTeamName = "Beta", FixtureDateInMilliseconds = 1730000000000 },
+            new Fixture { FixtureId = 2, FixtureGroupIdentifier = 10, HomeTeamName = "ALPHA", RoadTeamName = "Beta", FixtureDateInMilliseconds = 1730003600000 }
+        });
+
+        await gen.RunAllAsync("77", "League X");
+
+        files.Files.Keys.Should().HaveCount(2);
+        files.Files["Alpha.ics"].Should().Contain("SUMMARY:Alpha vs Beta").And.Contain("SUMMARY:ALPHA vs Beta");
+    }
+
+    [Fact]
     public async Task Escapes_Team_Name_In_Filename_And_Title()
     {
         var api = new FakeApiClient();
