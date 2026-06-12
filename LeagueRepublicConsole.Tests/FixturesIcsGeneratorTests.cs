@@ -126,6 +126,121 @@ public class FixturesIcsGeneratorTests
     }
 
     [Fact]
+    public async Task Falls_Back_To_First_Season_When_None_Marked_Current()
+    {
+        var fakeApi = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, ConfigWithLeagueId(123), fakeApi, files);
+        fakeApi.Seasons.AddRange(new[]
+        {
+            new Season { SeasonId = 7, SeasonName = "2023/24", CurrentSeason = false },
+            new Season { SeasonId = 8, SeasonName = "2024/25", CurrentSeason = false }
+        });
+
+        await gen.RunAsync("123", "Test League");
+
+        fakeApi.GroupCalls.Should().ContainSingle().Which.Should().Be(7);
+    }
+
+    [Fact]
+    public async Task Throws_When_No_Seasons_Returned()
+    {
+        var fakeApi = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, ConfigWithLeagueId(123), fakeApi, files);
+
+        var act = async () => await gen.RunAsync("123", "Test League");
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*No seasons*");
+    }
+
+    [Fact]
+    public async Task Throws_When_LeagueId_Missing_From_Arg_And_Config()
+    {
+        var fakeApi = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var emptyConfig = new ConfigurationBuilder().Build();
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, emptyConfig, fakeApi, files);
+
+        var act = async () => await gen.RunAsync(null, "Test League");
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Missing*leagueid*");
+    }
+
+    [Fact]
+    public async Task Throws_When_LeagueId_Is_Not_Numeric()
+    {
+        var fakeApi = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, ConfigWithLeagueId(123), fakeApi, files);
+
+        var act = async () => await gen.RunAsync("not-a-number", "Test League");
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Invalid*leagueid*");
+    }
+
+    [Fact]
+    public async Task Resolves_LeagueId_From_Config_When_Arg_Is_Empty()
+    {
+        var fakeApi = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, ConfigWithLeagueId(456), fakeApi, files);
+        fakeApi.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true });
+
+        await gen.RunAsync(string.Empty, "Test League");
+
+        fakeApi.LeagueIdCalls.Should().ContainSingle().Which.Should().Be(456);
+    }
+
+    [Fact]
+    public async Task Excludes_Non_Division_Fixture_Groups()
+    {
+        var fakeApi = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, ConfigWithLeagueId(123), fakeApi, files);
+        fakeApi.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true });
+        fakeApi.Groups.AddRange(new[]
+        {
+            new FixtureGroup { FixtureGroupIdentifier = 10, FixtureGroupDesc = "Division A", FixtureTypeId = 1, FixtureTypeDesc = "Division" },
+            new FixtureGroup { FixtureGroupIdentifier = 20, FixtureGroupDesc = "Knockout Cup", FixtureTypeId = 2, FixtureTypeDesc = "Cup" }
+        });
+
+        await gen.RunAsync("123", "Test League");
+
+        files.Files.Keys.Should().ContainSingle().Which.Should().EndWith("Division-A.ics");
+    }
+
+    [Fact]
+    public async Task Writes_Empty_Calendar_For_Division_With_No_Fixtures()
+    {
+        var fakeApi = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, ConfigWithLeagueId(123), fakeApi, files);
+        fakeApi.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true });
+        fakeApi.Groups.Add(new FixtureGroup { FixtureGroupIdentifier = 10, FixtureGroupDesc = "Division A", FixtureTypeId = 1, FixtureTypeDesc = "Division" });
+
+        await gen.RunAsync("123", "Test League");
+
+        var ics = files.Files["Division-A.ics"];
+        ics.Should().StartWith("BEGIN:VCALENDAR").And.EndWith("END:VCALENDAR\r\n").And.NotContain("BEGIN:VEVENT");
+    }
+
+    [Fact]
+    public async Task Excludes_Fixtures_Without_Group_Identifier()
+    {
+        var fakeApi = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, ConfigWithLeagueId(123), fakeApi, files);
+        fakeApi.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true });
+        fakeApi.Groups.Add(new FixtureGroup { FixtureGroupIdentifier = 10, FixtureGroupDesc = "Division A", FixtureTypeId = 1, FixtureTypeDesc = "Division" });
+        fakeApi.Fixtures.Add(new Fixture { FixtureId = 100, FixtureGroupIdentifier = null, HomeTeamName = "Orphan A", RoadTeamName = "Orphan B", FixtureDateInMilliseconds = 1730000000000 });
+
+        await gen.RunAsync("123", "Test League");
+
+        files.Files["Division-A.ics"].Should().NotContain("Orphan A");
+    }
+
+    [Fact]
     public async Task Forwards_CancellationToken_To_Api_Calls()
     {
         var fakeApi = new FakeApiClient();

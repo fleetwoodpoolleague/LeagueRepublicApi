@@ -149,6 +149,55 @@ public class CompetitionsCompletionUpdaterTests
         changed.Should().BeTrue();
     }
 
+    [Fact]
+    public void UpdateCompletionStatus_Skips_Entry_Missing_Date_Property()
+    {
+        var json = """
+        {
+            "completed": false,
+            "dates": [
+                { "name": "Week 1", "completed": false }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        var changed = CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 4, 17));
+        changed.Should().BeFalse();
+    }
+
+    [Fact]
+    public void UpdateCompletionStatus_Ignores_Null_Entries_In_Dates_Array()
+    {
+        var json = """
+        {
+            "completed": false,
+            "dates": [
+                null,
+                { "name": "Week 1", "date": "2026-04-15", "completed": false }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        var changed = CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 4, 17));
+        changed.Should().BeTrue();
+        root["dates"]![1]!["completed"]!.GetValue<bool>().Should().BeTrue();
+    }
+
+    [Fact]
+    public void UpdateCompletionStatus_Adds_Root_Completed_When_Property_Absent()
+    {
+        var json = """
+        {
+            "dates": [
+                { "name": "Week 1", "date": "2026-04-15", "completed": false }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 4, 17));
+        root["completed"]!.GetValue<bool>().Should().BeTrue();
+    }
+
     // ── UpdateCompletionStatus (multi-day entries with endDate) ──────────────
 
     [Fact]

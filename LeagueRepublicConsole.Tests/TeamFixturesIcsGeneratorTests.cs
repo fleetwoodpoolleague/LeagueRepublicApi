@@ -143,6 +143,47 @@ public class TeamFixturesIcsGeneratorTests
         files.Files["Alpha.ics"].Should().Contain("SUMMARY:Alpha vs Beta").And.Contain("SUMMARY:ALPHA vs Beta");
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Throws_When_Team_Name_Missing(string teamName)
+    {
+        var api = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var gen = new TeamFixturesIcsGenerator(NullLogger<TeamFixturesIcsGenerator>.Instance, ConfigWithLeagueId(77), api, files);
+
+        var act = async () => await gen.RunAsync("77", "League X", teamName);
+
+        await act.Should().ThrowAsync<ArgumentException>();
+    }
+
+    [Fact]
+    public async Task Matches_Team_Name_Case_Insensitively()
+    {
+        var api = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var gen = new TeamFixturesIcsGenerator(NullLogger<TeamFixturesIcsGenerator>.Instance, ConfigWithLeagueId(77), api, files);
+        api.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true });
+        api.Fixtures.Add(new Fixture { FixtureId = 1, FixtureGroupIdentifier = 10, HomeTeamName = "ALPHA", RoadTeamName = "Beta", FixtureDateInMilliseconds = 1730000000000 });
+
+        await gen.RunAsync("77", "League X", "alpha");
+
+        files.Files["alpha.ics"].Should().Contain("SUMMARY:ALPHA vs Beta");
+    }
+
+    [Fact]
+    public async Task Writes_Empty_Calendar_When_Team_Has_No_Fixtures()
+    {
+        var api = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var gen = new TeamFixturesIcsGenerator(NullLogger<TeamFixturesIcsGenerator>.Instance, ConfigWithLeagueId(77), api, files);
+        api.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true });
+
+        await gen.RunAsync("77", "League X", "Nobody");
+
+        files.Files["Nobody.ics"].Should().StartWith("BEGIN:VCALENDAR").And.NotContain("BEGIN:VEVENT");
+    }
+
     [Fact]
     public async Task Forwards_CancellationToken_To_Api_Calls()
     {
