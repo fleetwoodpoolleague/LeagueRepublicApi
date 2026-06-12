@@ -23,6 +23,7 @@ public sealed class CompetitionsUpdateCommand : ICommand<Unit>
             catch (Exception ex)
             {
                 logger.LogError(ex, "Unexpected exception updating competition files.");
+                throw;
             }
             return default;
         }

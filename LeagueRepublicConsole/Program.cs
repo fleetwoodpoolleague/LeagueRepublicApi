@@ -29,4 +29,12 @@ var builder = NuruApp.CreateBuilder()
 NuruApp app = builder.Build();
 
 // Run the app with the current command line arguments
-return await app.RunAsync(args);
+try
+{
+    return await app.RunAsync(args);
+}
+catch (Exception ex)
+{
+    Log.Logger.Fatal(ex, "Command failed.");
+    return 1;
+}

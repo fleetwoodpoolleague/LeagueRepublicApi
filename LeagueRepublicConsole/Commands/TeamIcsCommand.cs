@@ -26,6 +26,7 @@ public sealed class TeamIcsCommand : ICommand<Unit>
             catch (Exception ex)
             {
                 logger.LogError(ex, "Unexpected exception attempting to generate ics file(s).");
+                throw;
             }
 
             return default;
