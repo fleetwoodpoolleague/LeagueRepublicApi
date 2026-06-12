@@ -48,24 +48,7 @@ jobs:
         run: |
           chmod +x ./publish/LeagueRepublicConsole
           ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Cons A"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Kings Own Comrades"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Ashley"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Strawberry B"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Bug B"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Gardeners Vets"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Sherelles A"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Bar 1"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Wings Club"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Gardeners Arms"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Strawberry Gardens"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Royal Oak A"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "The Bug A"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Rossall Tavern"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Tee Time Social Club"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Top Club"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Working Mens Club"
-          ./publish/LeagueRepublicConsole team "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --team-name "Fleetwood Cons B"
+          ./publish/LeagueRepublicConsole teams "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League"
 
       - name: Push ICS files to target repository
         env:
