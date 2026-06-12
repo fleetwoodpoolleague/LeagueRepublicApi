@@ -337,6 +337,23 @@ public class CompetitionsCompletionUpdaterTests
     }
 
     [Fact]
+    public async Task RunAsync_Skips_Malformed_Json_File_And_Processes_Remaining_Files()
+    {
+        var files = new InMemoryFileWriter();
+        files.Files["mydir/broken.json"] = "{ not valid json !";
+        files.Files["mydir/ok.json"] = """
+        {"completed": false, "dates": [{"name": "W1", "date": "2020-01-01", "completed": false}]}
+        """;
+        var updater = CreateUpdater(files);
+
+        await updater.RunAsync("mydir", new DateOnly(2026, 4, 17));
+
+        files.Files["mydir/broken.json"].Should().Be("{ not valid json !");
+        JsonNode.Parse(files.Files["mydir/ok.json"])!["dates"]![0]!["completed"]!
+            .GetValue<bool>().Should().BeTrue();
+    }
+
+    [Fact]
     public async Task RunAsync_Throws_ArgumentException_For_Empty_Directory()
     {
         var files = new InMemoryFileWriter();

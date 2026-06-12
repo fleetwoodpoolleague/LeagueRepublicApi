@@ -27,7 +27,17 @@ public sealed class CompetitionsCompletionUpdater(
     internal void ProcessFile(string filePath, DateOnly? today = null)
     {
         var raw = files.ReadAllText(filePath);
-        var root = JsonNode.Parse(raw);
+        JsonNode? root;
+        try
+        {
+            root = JsonNode.Parse(raw);
+        }
+        catch (JsonException ex)
+        {
+            logger.LogWarning(ex, "Could not parse JSON in {FilePath}, skipping.", filePath);
+            return;
+        }
+
         if (root is null)
         {
             logger.LogWarning("Could not parse JSON in {FilePath}, skipping.", filePath);
