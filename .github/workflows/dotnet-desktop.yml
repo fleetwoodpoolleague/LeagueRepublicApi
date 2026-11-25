@@ -45,12 +45,14 @@ jobs:
         run: dotnet publish --configuration Release --no-restore --no-build --output ./publish
 
       - name: Generate ICS files
+        if: github.event_name != 'pull_request'
         run: |
           chmod +x ./publish/LeagueRepublicConsole
           ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League"
           ./publish/LeagueRepublicConsole teams "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League"
 
       - name: Push ICS files to target repository
+        if: github.event_name != 'pull_request'
         env:
           TARGET_REPO_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
@@ -77,6 +79,7 @@ jobs:
           fi
 
       - name: Update fylde8ball data
+        if: github.event_name != 'pull_request'
         env:
           FYLDE_REPO_TOKEN: ${{ secrets.FYLDE_EIGHTBALL }}
         run: |

@@ -89,13 +89,14 @@ public sealed class CompetitionsCompletionUpdater(
             }
         }
 
-        if (!changed) return false;
-
-        // Promote root completed when every entry is done
-        var allCompleted = datesArray.All(e => e?["completed"]?.GetValue<bool>() == true);
+        // Promote root completed when every entry is done, even if no entry flipped on this run
+        var allCompleted = datesArray.Count > 0 && datesArray.All(e => e?["completed"]?.GetValue<bool>() == true);
         if (allCompleted && root["completed"]?.GetValue<bool>() != true)
+        {
             root["completed"] = true;
+            changed = true;
+        }
 
-        return true;
+        return changed;
     }
 }

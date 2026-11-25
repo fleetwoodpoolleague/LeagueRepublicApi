@@ -88,7 +88,7 @@ public class CompetitionsCompletionUpdaterTests
     {
         var json = """
         {
-            "completed": false,
+            "completed": true,
             "dates": [
                 { "name": "Week 1", "date": "2026-04-01", "completed": true }
             ]
@@ -97,6 +97,23 @@ public class CompetitionsCompletionUpdaterTests
         var root = JsonNode.Parse(json)!;
         var changed = CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 4, 17));
         changed.Should().BeFalse();
+    }
+
+    [Fact]
+    public void UpdateCompletionStatus_Promotes_Root_Completed_When_All_Dates_Already_Completed()
+    {
+        var json = """
+        {
+            "completed": false,
+            "dates": [
+                { "name": "Week 1", "date": "2026-04-01", "completed": true }
+            ]
+        }
+        """;
+        var root = JsonNode.Parse(json)!;
+        var changed = CompetitionsCompletionUpdater.UpdateCompletionStatus(root, new DateOnly(2026, 4, 17));
+        changed.Should().BeTrue();
+        root["completed"]!.GetValue<bool>().Should().BeTrue();
     }
 
     [Fact]
