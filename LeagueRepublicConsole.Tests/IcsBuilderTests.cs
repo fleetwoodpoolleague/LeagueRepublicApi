@@ -88,10 +88,21 @@ public class IcsBuilderTests
     }
 
     [Fact]
-    public void Build_Omits_Dtstart_For_Undated_Fixture()
+    public void Build_Omits_Dtstart_And_Dtend_For_Undated_Fixture()
     {
         var ics = IcsBuilder.Build("L", "C", new List<Fixture> { MakeFixture(dateMs: null) }, Stamp);
         ics.Should().NotContain("DTSTART");
+        ics.Should().NotContain("DTEND");
+    }
+
+    [Fact]
+    public void Build_Emits_Dtend_After_Default_Match_Duration()
+    {
+        var start = new DateTimeOffset(2026, 6, 30, 18, 30, 0, TimeSpan.Zero);
+        var ics = IcsBuilder.Build("L", "C", new List<Fixture> { MakeFixture(dateMs: start.ToUnixTimeMilliseconds()) }, Stamp);
+
+        ics.Should().Contain("DTSTART:20260630T183000Z\r\n");
+        ics.Should().Contain("DTEND:20260630T210000Z\r\n");
     }
 
     [Fact]
@@ -146,5 +157,11 @@ public class IcsBuilderTests
     public void MakeSafeFileName_Replaces_Invalid_Chars_And_Spaces()
     {
         IcsBuilder.MakeSafeFileName("AC/DC Stars.ics").Should().Be("AC_DC-Stars.ics");
+    }
+
+    [Fact]
+    public void MakeSafeFileName_Trims_Whitespace_Before_Extension()
+    {
+        IcsBuilder.MakeSafeFileName("  Rossall Tavern .ics").Should().Be("Rossall-Tavern.ics");
     }
 }

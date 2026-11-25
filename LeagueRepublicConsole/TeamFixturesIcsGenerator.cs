@@ -34,8 +34,9 @@ public sealed class TeamFixturesIcsGenerator
         var fixtures = await GetCurrentSeasonFixturesAsync(leagueId, cancellationToken);
 
         var teamNames = fixtures
-            .SelectMany(f => new[] { f.HomeTeamName, f.RoadTeamName })
+            .SelectMany(f => new[] { f.HomeTeamName?.Trim(), f.RoadTeamName?.Trim() })
             .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase);
 
@@ -65,14 +66,16 @@ public sealed class TeamFixturesIcsGenerator
 
     private void WriteTeamCalendar(string leagueName, string teamName, IReadOnlyList<Fixture> fixtures, DateTime dtStamp)
     {
+        var trimmedTeamName = teamName.Trim();
+
         // Filter fixtures where the given team participates (home or away)
         var teamFixtures = fixtures
-            .Where(f => string.Equals(f.HomeTeamName, teamName, StringComparison.OrdinalIgnoreCase)
-                        || string.Equals(f.RoadTeamName, teamName, StringComparison.OrdinalIgnoreCase))
+            .Where(f => string.Equals(f.HomeTeamName?.Trim(), trimmedTeamName, StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(f.RoadTeamName?.Trim(), trimmedTeamName, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        var ics = IcsBuilder.Build(leagueName, teamName, teamFixtures, dtStamp);
-        var fileName = IcsBuilder.MakeSafeFileName(teamName + ".ics");
+        var ics = IcsBuilder.Build(leagueName, trimmedTeamName, teamFixtures, dtStamp);
+        var fileName = IcsBuilder.MakeSafeFileName(trimmedTeamName + ".ics");
         _files.WriteAllText(fileName, ics);
     }
 }

@@ -277,4 +277,31 @@ public class FixturesIcsGeneratorTests
         ics.Should().Contain("DTSTAMP:");
         ics.Should().EndWith("END:VCALENDAR\r\n");
     }
+
+    [Fact]
+    public async Task Writes_Manifest_Json_With_Divisions_And_Teams_When_Requested()
+    {
+        var fakeApi = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var config = ConfigWithLeagueId(123);
+        var gen = new FixturesIcsGenerator(NullLogger<FixturesIcsGenerator>.Instance, config, fakeApi, files);
+
+        fakeApi.Seasons.Add(new Season { SeasonId = 1, SeasonName = "Summer 2026", CurrentSeason = true });
+        fakeApi.Groups.Add(new FixtureGroup { FixtureGroupIdentifier = 10, FixtureGroupDesc = "Division 1", FixtureTypeId = 1, FixtureTypeDesc = "Division" });
+        fakeApi.Fixtures.AddRange(new[]
+        {
+            new Fixture { FixtureId = 100, FixtureGroupIdentifier = 10, HomeTeamName = "Rossall Tavern ", RoadTeamName = "Bar 1", FixtureDateInMilliseconds = 1730000000000 },
+            new Fixture { FixtureId = 101, FixtureGroupIdentifier = 20, HomeTeamName = "Bar 1", RoadTeamName = "Cup Opponent", FixtureDateInMilliseconds = 1730003600000 }
+        });
+
+        await gen.RunAsync("123", "Test League", "manifest.json");
+
+        files.Files.Keys.Should().Contain("manifest.json");
+        var manifest = files.Files["manifest.json"];
+        manifest.Should().Contain("\"seasonName\": \"Summer 2026\"");
+        manifest.Should().Contain("\"file\": \"Division-1.ics\"");
+        manifest.Should().Contain("\"file\": \"Rossall-Tavern.ics\"");
+        manifest.Should().Contain("\"file\": \"Bar-1.ics\"");
+        manifest.Should().Contain("\"fixtureCount\": 2"); // Bar 1 has 1 division + 1 cup fixture
+    }
 }

@@ -48,7 +48,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           chmod +x ./publish/LeagueRepublicConsole
-          ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League"
+          ./publish/LeagueRepublicConsole ics "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League" --manifest manifest.json
           ./publish/LeagueRepublicConsole teams "${{ secrets.LEAGUE_ID }}" --league-name "Fleetwood Pool League"
 
       - name: Push ICS files to target repository
@@ -69,6 +69,7 @@ jobs:
           mkdir -p "${TARGET_DIR}"
           rm -f ${TARGET_DIR}/*.ics 2>/dev/null || true
           cp ../*.ics "${TARGET_DIR}/" || true
+          cp ../manifest.json "${TARGET_DIR}/" 2>/dev/null || true
 
           git add "${TARGET_DIR}/"
           if git diff --staged --quiet; then

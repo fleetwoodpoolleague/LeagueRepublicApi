@@ -217,4 +217,22 @@ public class TeamFixturesIcsGeneratorTests
         // "/" needs no escaping per RFC 5545
         ics.Should().Contain("X-WR-CALNAME:League X: AC/DC Stars");
     }
+
+    [Fact]
+    public async Task RunAllAsync_Trims_Trailing_Spaces_From_Team_Names()
+    {
+        var api = new FakeApiClient();
+        var files = new InMemoryFileWriter();
+        var cfg = ConfigWithLeagueId(77);
+        var gen = new TeamFixturesIcsGenerator(NullLogger<TeamFixturesIcsGenerator>.Instance, cfg, api, files);
+
+        api.Seasons.Add(new Season { SeasonId = 1, CurrentSeason = true });
+        api.Fixtures.Add(new Fixture { FixtureId = 1, FixtureGroupIdentifier = 10, HomeTeamName = "Rossall Tavern ", RoadTeamName = " Bar 1", FixtureDateInMilliseconds = 1730000000000 });
+
+        await gen.RunAllAsync("77", "League X");
+
+        files.Files.Keys.Should().BeEquivalentTo("Rossall-Tavern.ics", "Bar-1.ics");
+        files.Files["Rossall-Tavern.ics"].Should().Contain("X-WR-CALNAME:League X: Rossall Tavern\r\n");
+        files.Files["Rossall-Tavern.ics"].Should().Contain("SUMMARY:Rossall Tavern vs Bar 1\r\n");
+    }
 }

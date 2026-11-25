@@ -12,6 +12,8 @@ public sealed class IcsCommand : ICommand<Unit>
     public string LeagueId { get; set; } = string.Empty;
     [Option("--league-name", "", Description = "League name to generate the ics file for. Required if league ID is not provided.")]
     public string LeagueName { get; set; } = string.Empty;
+    [Option("--manifest", "", Description = "Optional file path to write a JSON manifest of divisions and teams.")]
+    public string? Manifest { get; set; }
 
     public sealed class Handler(ILogger<Handler> logger, FixturesIcsGenerator icsGenerator) : ICommandHandler<IcsCommand, Unit>
     {
@@ -20,7 +22,7 @@ public sealed class IcsCommand : ICommand<Unit>
             try
             {
                 logger.LogInformation("Handling ics Command");
-                await icsGenerator.RunAsync(request.LeagueId, request.LeagueName, cancellationToken);
+                await icsGenerator.RunAsync(request.LeagueId, request.LeagueName, request.Manifest, cancellationToken);
             }
             catch (Exception ex)
             {

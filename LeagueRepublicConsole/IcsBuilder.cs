@@ -10,11 +10,14 @@ namespace LeagueRepublicConsole;
 /// </summary>
 public static class IcsBuilder
 {
+    public static readonly TimeSpan DefaultEventDuration = TimeSpan.FromHours(2.5);
+
     public static string Build(string? leagueName, string calendarName, IEnumerable<Fixture> fixtures, DateTime dtStampUtc)
     {
+        var trimmedCalendarName = calendarName.Trim();
         var calendarTitle = string.IsNullOrWhiteSpace(leagueName)
-            ? Escape(calendarName)
-            : $"{Escape(leagueName)}: {Escape(calendarName)}";
+            ? Escape(trimmedCalendarName)
+            : $"{Escape(leagueName.Trim())}: {Escape(trimmedCalendarName)}";
         var sb = new StringBuilder();
         sb.Append("BEGIN:VCALENDAR\r\n");
         sb.Append("VERSION:2.0\r\n");
@@ -33,12 +36,13 @@ public static class IcsBuilder
             {
                 var dt = DateTimeOffset.FromUnixTimeMilliseconds(ms).UtcDateTime;
                 sb.Append("DTSTART:").Append(FormatDateTimeUtc(dt)).Append("\r\n");
+                sb.Append("DTEND:").Append(FormatDateTimeUtc(dt.Add(DefaultEventDuration))).Append("\r\n");
             }
-            var summary = $"{f.HomeTeamName} vs {f.RoadTeamName}";
+            var summary = $"{f.HomeTeamName?.Trim()} vs {f.RoadTeamName?.Trim()}";
             sb.Append("SUMMARY:").Append(Escape(summary)).Append("\r\n");
             if (!string.IsNullOrWhiteSpace(f.VenueAndSubVenueDesc))
             {
-                sb.Append("LOCATION:").Append(Escape(f.VenueAndSubVenueDesc!)).Append("\r\n");
+                sb.Append("LOCATION:").Append(Escape(f.VenueAndSubVenueDesc!.Trim())).Append("\r\n");
             }
             var desc = BuildDescription(f);
             if (!string.IsNullOrEmpty(desc))
@@ -80,9 +84,13 @@ public static class IcsBuilder
 
     public static string MakeSafeFileName(string name)
     {
-        foreach (var c in Path.GetInvalidFileNameChars())
-            name = name.Replace(c, '_');
+        var normalized = name.EndsWith(".ics", StringComparison.OrdinalIgnoreCase)
+            ? name[..^4].Trim() + name[^4..]
+            : name.Trim();
 
-        return name.Replace(" ", "-");
+        foreach (var c in Path.GetInvalidFileNameChars())
+            normalized = normalized.Replace(c, '_');
+
+        return normalized.Replace(" ", "-");
     }
 }

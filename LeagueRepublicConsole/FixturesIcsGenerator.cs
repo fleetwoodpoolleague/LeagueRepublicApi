@@ -1,3 +1,4 @@
+using System.Text.Json;
 using LeagueRepublicApi;
 using LeagueRepublicApi.Models.Fixtures;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +8,12 @@ namespace LeagueRepublicConsole;
 
 public sealed class FixturesIcsGenerator
 {
+    private static readonly JsonSerializerOptions ManifestJsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
+
     private readonly ILogger<FixturesIcsGenerator> _logger;
     private readonly IConfiguration _config;
     private readonly ILeagueRepublicApiClient _api;
@@ -20,7 +27,10 @@ public sealed class FixturesIcsGenerator
         _files = files ?? throw new ArgumentNullException(nameof(files));
     }
 
-    public async Task RunAsync(string? leagueId, string? leagueName, CancellationToken cancellationToken = default)
+    public Task RunAsync(string? leagueId, string? leagueName, CancellationToken cancellationToken = default)
+        => RunAsync(leagueId, leagueName, manifestPath: null, cancellationToken);
+
+    public async Task RunAsync(string? leagueId, string? leagueName, string? manifestPath, CancellationToken cancellationToken = default)
     {
         var leagueIdStr = string.IsNullOrEmpty(leagueId) ?  _config["leagueid"] : leagueId;
         
@@ -52,13 +62,53 @@ public sealed class FixturesIcsGenerator
             .ToDictionary(g => g.Key, g => g.ToList());
 
         var dtStamp = DateTime.UtcNow;
+        var divisionEntries = new List<object>();
         foreach (var group in divisionGroups)
         {
             fixturesByGroup.TryGetValue(group.FixtureGroupIdentifier, out var groupFixtures);
             groupFixtures ??= new List<Fixture>();
-            var ics = IcsBuilder.Build(leagueName, group.FixtureGroupDesc ?? $"Group {group.FixtureGroupIdentifier}", groupFixtures, dtStamp);
-            var safeName = IcsBuilder.MakeSafeFileName((group.FixtureGroupDesc ?? group.FixtureGroupIdentifier.ToString()) + ".ics");
+            var groupName = (group.FixtureGroupDesc ?? $"Group {group.FixtureGroupIdentifier}").Trim();
+            var ics = IcsBuilder.Build(leagueName, groupName, groupFixtures, dtStamp);
+            var safeName = IcsBuilder.MakeSafeFileName((group.FixtureGroupDesc?.Trim() ?? group.FixtureGroupIdentifier.ToString()) + ".ics");
             _files.WriteAllText(safeName, ics);
+
+            if (!string.IsNullOrWhiteSpace(manifestPath))
+            {
+                var teamEntries = groupFixtures
+                    .SelectMany(f => new[] { f.HomeTeamName?.Trim(), f.RoadTeamName?.Trim() })
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Select(name => name!)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+                    .Select(teamName => new
+                    {
+                        name = teamName,
+                        file = IcsBuilder.MakeSafeFileName(teamName + ".ics"),
+                        fixtureCount = fixtures.Count(f =>
+                            string.Equals(f.HomeTeamName?.Trim(), teamName, StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(f.RoadTeamName?.Trim(), teamName, StringComparison.OrdinalIgnoreCase))
+                    })
+                    .ToList();
+
+                divisionEntries.Add(new
+                {
+                    name = groupName,
+                    file = safeName,
+                    fixtureCount = groupFixtures.Count,
+                    teams = teamEntries
+                });
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(manifestPath))
+        {
+            var manifest = new
+            {
+                seasonName = current.SeasonName?.Trim() ?? string.Empty,
+                updatedAt = dtStamp.ToString("O"),
+                divisions = divisionEntries
+            };
+            _files.WriteAllText(manifestPath, JsonSerializer.Serialize(manifest, ManifestJsonOptions));
         }
     }
 }
